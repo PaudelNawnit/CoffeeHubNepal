@@ -5,10 +5,6 @@ import { ListingCard } from '@/components/cards/ListingCard';
 import { MOCK_LISTINGS } from '@/utils/mockData';
 import { ListingDetail } from './ListingDetail';
 
-interface MarketplaceProps {
-  onNavigate?: (page: string) => void;
-}
-
 export const Marketplace = () => {
   const [selectedListing, setSelectedListing] = useState<typeof MOCK_LISTINGS[0] | null>(null);
 
