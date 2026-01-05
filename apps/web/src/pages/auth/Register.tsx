@@ -5,7 +5,7 @@ import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import logoImage from '@/assets/images/logo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
 
 interface RegisterProps {
   onBack?: () => void;

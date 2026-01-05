@@ -1,7 +1,7 @@
 import { ArrowLeft, Users, Target, Heart, Award, Coffee } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
-import logoImage from '@/assets/images/logo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
 import surajNepalImage from '@/assets/images/team/SurajNepal.png';
 import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.png';
 import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.jpeg';
@@ -127,14 +127,14 @@ export const AboutUs = () => {
             <Users className="text-[#6F4E37]" size={28} />
             <h3 className="text-2xl font-black">Our Team</h3>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {TEAM_MEMBERS.map((member, idx) => (
-              <Card key={idx} className="p-4 text-center group hover:shadow-lg transition-all">
-                <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-[#EBE3D5] group-hover:border-[#6F4E37] transition-colors">
+              <Card key={idx} className="p-4 lg:p-5 text-center group hover:shadow-lg transition-all">
+                <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-[#EBE3D5] group-hover:border-[#6F4E37] transition-colors">
                   <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                 </div>
-                <h4 className="font-black text-sm mb-1">{member.name}</h4>
-                <p className="text-xs text-gray-600">{member.role}</p>
+                <h4 className="font-black text-sm lg:text-base mb-1">{member.name}</h4>
+                <p className="text-xs lg:text-sm text-gray-600">{member.role}</p>
               </Card>
             ))}
           </div>

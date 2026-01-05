@@ -1,6 +1,6 @@
 import { Search, Bell } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import logoImage from '@/assets/images/logo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
 
 export const Header = () => {
   const { setCurrentPage } = useApp();

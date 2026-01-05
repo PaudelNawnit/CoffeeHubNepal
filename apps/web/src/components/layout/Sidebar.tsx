@@ -1,7 +1,7 @@
 import { Home, MessageSquare, Store, Bell, User, Plus, Briefcase, DollarSign, Calendar, Users } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/common/Button';
-import logoImage from '@/assets/images/logo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
 
 interface SidebarProps {
   onMenuOpen: () => void;
