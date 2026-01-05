@@ -5,7 +5,7 @@ import logoImage from '@/assets/images/logo.png';
 import surajNepalImage from '@/assets/images/team/SurajNepal.png';
 import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.png';
 import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.jpeg';
-import KrrishNyopaneImage from '@/assets/images/team/KrrishNyopane.png';
+import KrrishNyopaneImage from '@/assets/images/team/KrrishNyoupane.png';
 import SachinJhaImage from '@/assets/images/team/SachinJha.png';
 import MukeshPandeyImage from '@/assets/images/team/MukeshPandey.png';
 import NawnitPoudelImage from '@/assets/images/team/NawnitPoudel.png';
@@ -130,7 +130,7 @@ export const AboutUs = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {TEAM_MEMBERS.map((member, idx) => (
               <Card key={idx} className="p-4 text-center group hover:shadow-lg transition-all">
-                <div className="w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden border-2 border-[#EBE3D5] group-hover:border-[#6F4E37] transition-colors">
+                <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden border-2 border-[#EBE3D5] group-hover:border-[#6F4E37] transition-colors">
                   <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                 </div>
                 <h4 className="font-black text-sm mb-1">{member.name}</h4>
