@@ -11,12 +11,12 @@ export interface Notice {
 }
 
 export const noticeService = {
-  async getNotices(filters?: { type?: string; priority?: string }) {
+  async getNotices(_filters?: { type?: string; priority?: string }) {
     // TODO: Replace with actual API call
     return [];
   },
 
-  async getNotice(id: number) {
+  async getNotice(_id: number) {
     // TODO: Replace with actual API call
     return null;
   },

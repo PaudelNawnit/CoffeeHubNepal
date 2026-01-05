@@ -21,12 +21,12 @@ export interface Answer {
 }
 
 export const qnaService = {
-  async getQuestions(filters?: { category?: string; search?: string }) {
+  async getQuestions(_filters?: { category?: string; search?: string }) {
     // TODO: Replace with actual API call
     return [];
   },
 
-  async getQuestion(id: number) {
+  async getQuestion(_id: number) {
     // TODO: Replace with actual API call
     return null;
   },
@@ -36,7 +36,7 @@ export const qnaService = {
     return { id: Date.now(), ...data, answers: 0, createdAt: new Date().toISOString() };
   },
 
-  async getAnswers(questionId: number) {
+  async getAnswers(_questionId: number) {
     // TODO: Replace with actual API call
     return [];
   },

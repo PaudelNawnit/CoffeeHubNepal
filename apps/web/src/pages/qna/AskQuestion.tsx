@@ -3,7 +3,6 @@ import { ArrowLeft, Sparkles, Send } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
 
 interface AskQuestionProps {
   onBack: () => void;

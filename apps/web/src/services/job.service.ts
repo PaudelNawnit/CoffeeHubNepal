@@ -12,12 +12,12 @@ export interface Job {
 }
 
 export const jobService = {
-  async getJobs(filters?: { type?: string; location?: string }) {
+  async getJobs(_filters?: { type?: string; location?: string }) {
     // TODO: Replace with actual API call
     return [];
   },
 
-  async getJob(id: number) {
+  async getJob(_id: number) {
     // TODO: Replace with actual API call
     return null;
   },
@@ -27,7 +27,7 @@ export const jobService = {
     return { id: Date.now(), ...data, createdAt: new Date().toISOString() };
   },
 
-  async applyToJob(jobId: number) {
+  async applyToJob(_jobId: number) {
     // TODO: Replace with actual API call
     return { success: true, message: 'Application submitted successfully' };
   }

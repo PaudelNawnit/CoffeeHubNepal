@@ -8,7 +8,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ onMenuOpen }: SidebarProps) => {
-  const { currentPage, setCurrentPage, navigate } = useApp();
+  const { currentPage, setCurrentPage } = useApp();
 
   const mainTabs = [
     { id: 'home', icon: Home, label: 'Home' },

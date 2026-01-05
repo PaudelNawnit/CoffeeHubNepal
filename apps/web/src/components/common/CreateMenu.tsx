@@ -1,4 +1,3 @@
-import { Modal } from './Modal';
 import { Store, MessageSquare, Bell, Briefcase } from 'lucide-react';
 
 interface CreateMenuProps {

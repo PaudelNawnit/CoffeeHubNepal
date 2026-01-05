@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Upload, FileText, CheckCircle, Camera } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
 
 interface FarmerVerificationProps {
   onBack?: () => void;

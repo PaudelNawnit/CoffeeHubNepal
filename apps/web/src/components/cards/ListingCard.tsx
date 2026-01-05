@@ -1,5 +1,4 @@
 import { Card } from '../common/Card';
-import { Badge } from '../common/Badge';
 import { MapPin } from 'lucide-react';
 
 interface Listing {

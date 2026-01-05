@@ -9,7 +9,7 @@ interface MarketplaceProps {
   onNavigate?: (page: string) => void;
 }
 
-export const Marketplace = ({ onNavigate }: MarketplaceProps) => {
+export const Marketplace = () => {
   const [selectedListing, setSelectedListing] = useState<typeof MOCK_LISTINGS[0] | null>(null);
 
   return (

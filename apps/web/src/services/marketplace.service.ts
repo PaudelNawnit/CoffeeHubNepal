@@ -13,12 +13,12 @@ export interface Listing {
 }
 
 export const marketplaceService = {
-  async getListings(filters?: { category?: string; search?: string; location?: string }) {
+  async getListings(_filters?: { category?: string; search?: string; location?: string }) {
     // TODO: Replace with actual API call
     return [];
   },
 
-  async getListing(id: number) {
+  async getListing(_id: number) {
     // TODO: Replace with actual API call
     return null;
   },
@@ -33,7 +33,7 @@ export const marketplaceService = {
     return { id, ...data };
   },
 
-  async deleteListing(id: number) {
+  async deleteListing(_id: number) {
     // TODO: Replace with actual API call
     return true;
   }

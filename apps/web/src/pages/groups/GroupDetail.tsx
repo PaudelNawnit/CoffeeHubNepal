@@ -1,15 +1,13 @@
 import { ArrowLeft, Users, MessageSquare, Settings, Plus, Send } from 'lucide-react';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
 
 interface GroupDetailProps {
   groupId: number;
   onBack: () => void;
 }
 
-export const GroupDetail = ({ groupId, onBack }: GroupDetailProps) => {
+export const GroupDetail = ({ onBack }: GroupDetailProps) => {
   const group = {
     id: 1,
     name: "Kaski Coffee Farmers",

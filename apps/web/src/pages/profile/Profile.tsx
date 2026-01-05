@@ -20,7 +20,7 @@ import {
 
 export const Profile = () => {
   const { navigate, setCurrentPage, userRole, setUserRole } = useApp();
-  const { user, logout: authLogout } = useAuth();
+  const { logout: authLogout } = useAuth();
 
   const getRoleDisplay = (role: string) => {
     const roleMap: { [key: string]: { label: string; variant: 'primary' | 'success' | 'alert' | 'ai' } } = {

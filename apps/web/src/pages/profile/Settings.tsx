@@ -1,4 +1,4 @@
-import { ArrowLeft, Bell, Moon, Globe, Shield, Trash2, User, Mail, Phone, MapPin, Info, MessageCircle, FileText } from 'lucide-react';
+import { ArrowLeft, Bell, Moon, Shield, Trash2, User, Info, MessageCircle, FileText } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -6,7 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
 
 export const Settings = () => {
-  const { setCurrentPage } = useApp();
+  const { setCurrentPage, setSubPage } = useApp();
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState('en');

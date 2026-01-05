@@ -1,6 +1,6 @@
 import { Users, MessageSquare, Store, ShieldCheck, TrendingUp, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
+import { Button } from '@/components/common/Button';
 
 export const Dashboard = () => {
   const stats = [

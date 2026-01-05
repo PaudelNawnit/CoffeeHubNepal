@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, User, Mail, Lock, Phone, MapPin, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import logoImage from '@/assets/images/logo.png';

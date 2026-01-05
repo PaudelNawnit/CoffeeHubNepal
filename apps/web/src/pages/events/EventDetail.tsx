@@ -9,7 +9,7 @@ interface EventDetailProps {
   onRegister?: () => void;
 }
 
-export const EventDetail = ({ eventId, onBack, onRegister }: EventDetailProps) => {
+export const EventDetail = ({ onBack, onRegister }: EventDetailProps) => {
   const event = {
     id: 1,
     title: "Coffee Harvest Festival 2024",

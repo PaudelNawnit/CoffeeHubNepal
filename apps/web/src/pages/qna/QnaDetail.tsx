@@ -3,7 +3,6 @@ import { ArrowLeft, MessageSquare, ThumbsUp, Sparkles, Send, CheckCircle } from 
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
-import { Input } from '@/components/common/Input';
 import { MOCK_QA } from '@/utils/mockData';
 
 interface QnaDetailProps {

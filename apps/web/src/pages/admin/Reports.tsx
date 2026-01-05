@@ -1,4 +1,4 @@
-import { ArrowLeft, AlertTriangle, Eye, Ban, CheckCircle, MessageSquare } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Eye, Ban, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
