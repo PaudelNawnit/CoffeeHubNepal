@@ -20,7 +20,7 @@ const TEAM_MEMBERS = [
   { name: "Siddhant Giri", role: "Front End Developer", image: SiddhantGiriImage },
   { name: "Krrish Nyopane", role: "UI/UX Designer", image: KrrishNyopaneImage },
   { name: "Sachin Jha", role: "Graphic Designer", image: SachinJhaImage },
-  { name: "Mukesh Pandeya", role: "Graphic Designer", image: MukeshPandeyImage },
+  { name: "Mukesh Pandey", role: "Graphic Designer", image: MukeshPandeyImage },
   { name: "Nawnit Paudel", role: "Tester", image: NawnitPoudelImage },
   { name: "Supriya Khadka", role: "App Developer", image: SupriyaKhadkaImage },
   { name: "Rajdip Joshi", role: "App Developer", image: RajdipJoshiImage },
