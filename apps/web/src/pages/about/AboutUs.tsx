@@ -8,7 +8,7 @@ import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.jpeg';
 import KrrishNyopaneImage from '@/assets/images/team/KrrishNyoupane.png';
 import SachinJhaImage from '@/assets/images/team/SachinJha.png';
 import MukeshPandeyImage from '@/assets/images/team/MukeshPandey.png';
-import NawnitPoudelImage from '@/assets/images/team/NawnitPoudel.png';
+import NawnitPoudelImage from '@/assets/images/team/NawnitPaudel.png';
 import SupriyaKhadkaImage from '@/assets/images/team/SupriyaKhadka.png';
 import RajdipJoshiImage from '@/assets/images/team/RajdipJoshi.png';
 import AasthaGaireImage from '@/assets/images/team/AasthaGaire.png';
@@ -91,7 +91,7 @@ export const AboutUs = () => {
         <Card className="p-6 lg:p-8">
           <div className="flex items-center gap-3 mb-6">
             <Coffee className="text-[#6F4E37]" size={28} />
-            <h3 className="text-2xl font-black">What We Do?</h3>
+            <h3 className="text-2xl font-black">What We Do</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
