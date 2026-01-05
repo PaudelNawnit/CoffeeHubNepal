@@ -4,7 +4,7 @@ import { useApp } from '@/context/AppContext';
 import logoImage from '@/assets/images/logo.png';
 
 const TEAM_MEMBERS = [
-  { name: "Suraj Nepal", role: "Team Member", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SurajNepal" },
+  { name: "Suraj Nepal", role: "Team Member", image: "@/assets/images/team/SurajNepal.png" },
   { name: "Sarthak Bhattarai", role: "Strategist", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SarthakBhattarai" },
   { name: "Siddhant Giri", role: "Front End Developer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SiddhantGiri" },
   { name: "Krrish Nyopane", role: "UI/UX Designer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=KrrishNyopane" },
