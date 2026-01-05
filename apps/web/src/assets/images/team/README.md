@@ -34,7 +34,7 @@ const TEAM_MEMBERS = [
 
 ## Current Team Members
 
-1. Suraj Nepal - Team Member
+1. Suraj Nepal - Nothing
 2. Sarthak Bhattarai - Strategist
 3. Siddhant Giri - Front End Developer
 4. Krrish Nyopane - UI/UX Designer

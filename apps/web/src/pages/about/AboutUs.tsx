@@ -3,19 +3,31 @@ import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
 import logoImage from '@/assets/images/logo.png';
 import surajNepalImage from '@/assets/images/team/SurajNepal.png';
+import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.png';
+import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.jpeg';
+import KrrishNyopaneImage from '@/assets/images/team/KrrishNyopane.png';
+import SachinJhaImage from '@/assets/images/team/SachinJha.png';
+import MukeshPandeyImage from '@/assets/images/team/MukeshPandey.png';
+import NawnitPoudelImage from '@/assets/images/team/NawnitPoudel.png';
+import SupriyaKhadkaImage from '@/assets/images/team/SupriyaKhadka.png';
+import RajdipJoshiImage from '@/assets/images/team/RajdipJoshi.png';
+import AasthaGaireImage from '@/assets/images/team/AasthaGaire.png';
+import PradipKhanalImage from '@/assets/images/team/PradipKhanal.png';
 
 const TEAM_MEMBERS = [
   { name: "Suraj Nepal", role: "Nothing", image: surajNepalImage },
-  { name: "Sarthak Bhattarai", role: "Strategist", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SarthakBhattarai" },
-  { name: "Siddhant Giri", role: "Front End Developer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SiddhantGiri" },
-  { name: "Krrish Nyopane", role: "UI/UX Designer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=KrrishNyopane" },
-  { name: "Sachin Jha", role: "Graphic Designer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SachinJha" },
-  { name: "Mukesh Pandey", role: "Graphic Designer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=MukeshPandey" },
-  { name: "Nawnit Poudel", role: "Tester", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=NawnitPoudel" },
-  { name: "Supriya Khadka", role: "App Developer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=SupriyaKhadka" },
-  { name: "Rajdip Joshi", role: "App Developer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=RajdipJoshi" },
-  { name: "Aastha Gaire", role: "Backend Developer", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=AasthaGaire" },
-  { name: "Pradip Khanal", role: "Researcher", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=PradipKhanal" }
+  { name: "Sarthak Bhattarai", role: "Strategist", image: SarthakBhattaraiImage },
+  { name: "Siddhant Giri", role: "Front End Developer", image: SiddhantGiriImage },
+  { name: "Krrish Nyopane", role: "UI/UX Designer", image: KrrishNyopaneImage },
+  { name: "Sachin Jha", role: "Graphic Designer", image: SachinJhaImage },
+  { name: "Mukesh Pandeya", role: "Graphic Designer", image: MukeshPandeyImage },
+  { name: "Nawnit Paudel", role: "Tester", image: NawnitPoudelImage },
+  { name: "Supriya Khadka", role: "App Developer", image: SupriyaKhadkaImage },
+  { name: "Rajdip Joshi", role: "App Developer", image: RajdipJoshiImage },
+  { name: "Aastha Gaire", role: "Backend Developer", image: AasthaGaireImage },
+  { name: "Pradip Khanal", role: "Researcher", image: PradipKhanalImage }
+
+  
 ];
 
 export const AboutUs = () => {
