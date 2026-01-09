@@ -1,19 +1,15 @@
 export const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 
-// For combined deployment (same domain), use relative URLs
-// For separate deployment, set VITE_API_URL to the API domain
-// Default to localhost for development
+// API URL Configuration:
+// - Set VITE_API_URL in .env for production API endpoint
+// - Use empty string '' for same-domain deployment (relative URLs)
+// - Defaults to localhost:4000 for development
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   
-  // If explicitly set, use it (empty string = relative URLs)
-  if (envUrl !== undefined && envUrl !== '') {
+  // If VITE_API_URL is set, use it
+  if (envUrl !== undefined) {
     return envUrl;
-  }
-  
-  // Production: use VPS API server
-  if (import.meta.env.PROD) {
-    return 'http://72.61.229.21:4000';
   }
   
   // Default to localhost for development
