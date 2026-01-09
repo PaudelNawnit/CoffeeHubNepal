@@ -12,6 +12,11 @@ const getApiBaseUrl = () => {
     return envUrl;
   }
   
+  // Production: use VPS API (temporary until Heroku is set up)
+  if (import.meta.env.PROD) {
+    return 'http://72.61.229.21:4000';
+  }
+  
   // Default to localhost for development
   return 'http://localhost:4000';
 };
