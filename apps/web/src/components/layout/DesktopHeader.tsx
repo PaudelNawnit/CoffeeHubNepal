@@ -4,7 +4,7 @@ import { Icon } from '@/components/common/Icon';
 import { t } from '@/i18n';
 
 export const DesktopHeader = () => {
-  const { setCurrentPage, language, setLanguage } = useApp();
+  const { setCurrentPage, language, setLanguage, navigate } = useApp();
   const { user } = useAuth();
   
   // Get user display name and role
@@ -85,8 +85,12 @@ export const DesktopHeader = () => {
           </button>
 
           <button 
-            onClick={() => setCurrentPage('profile')}
+            onClick={() => {
+              setCurrentPage('profile');
+              navigate('settings');
+            }}
             className="p-3 bg-white/50 backdrop-blur-sm rounded-xl border border-coffee-dark/10 text-coffee-dark hover:bg-white/70 hover:border-coffee-dark/30 hover:shadow-sm transition-all"
+            title="Settings"
           >
             <Icon name="DesktopHeader_Settings_20" size={20} />
           </button>
