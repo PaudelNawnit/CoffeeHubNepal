@@ -16,18 +16,18 @@ import PradipKhanalImage from '@/assets/images/team/PradipKhanal.png';
 import AdityaManShresthaImage from '@/assets/images/team/AdityaManShrestha.png';
 
 const TEAM_MEMBERS = [
-  { name: "Suraj Nepal", role: "Nothing", image: surajNepalImage },
-  { name: "Sarthak Bhattarai", role: "Strategist", image: SarthakBhattaraiImage },
+  { name: "Suraj Nepal", role: "Backend Developer", image: surajNepalImage },
+  { name: "Sarthak Bhattarai", role: "Social Media Manager", image: SarthakBhattaraiImage },
   { name: "Siddhant Giri", role: "Front End Developer", image: SiddhantGiriImage },
   { name: "Krrish Nyopane", role: "UI/UX Designer", image: KrrishNyopaneImage },
   { name: "Sachin Jha", role: "Graphic Designer", image: SachinJhaImage },
   { name: "Mukesh Pandey", role: "Graphic Designer", image: MukeshPandeyImage },
-  { name: "Nawnit Paudel", role: "Tester", image: NawnitPoudelImage },
+  { name: "Nawnit Paudel", role: "Security Expert", image: NawnitPoudelImage },
   { name: "Supriya Khadka", role: "App Developer", image: SupriyaKhadkaImage },
   { name: "Rajdip Joshi", role: "App Developer", image: RajdipJoshiImage },
-  { name: "Aastha Gaire", role: "Backend Developer", image: AasthaGaireImage },
-  { name: "Pradip Khanal", role: "Researcher", image: PradipKhanalImage },
-  { name: "Aditya Man Shrestha", role: "Researcher", image: AdityaManShresthaImage }
+  { name: "Aastha Gaire", role: "Developer", image: AasthaGaireImage },
+  { name: "Pradip Khanal", role: "Content Writer", image: PradipKhanalImage },
+  { name: "Aditya Man Shrestha", role: "Content Writer", image: AdityaManShresthaImage }
 
   
 ];
