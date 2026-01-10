@@ -74,7 +74,7 @@ export const marketplaceService = {
     return { ...product, id: product._id, user: product.sellerName };
   },
 
-  async createListing(data: Omit<Listing, '_id' | 'id' | 'createdAt' | 'user' | 'sellerName'>): Promise<Listing> {
+  async createListing(data: Omit<Listing, '_id' | 'id' | 'createdAt' | 'user' | 'sellerName' | 'verified'>): Promise<Listing> {
     const response = await fetch(`${API_BASE_URL}/products`, {
       method: 'POST',
       headers: getAuthHeaders(),
