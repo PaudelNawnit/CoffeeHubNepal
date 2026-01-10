@@ -77,15 +77,8 @@ export const Prices = () => {
     }
 
     try {
-      // Compress image (800x800 max for price images, quality 0.75)
-      const compressedDataUrl = await compressImage(file, 800, 800, 0.75);
-      
-      // Check final base64 size (max ~600KB per price image)
-      const base64Size = (compressedDataUrl.length * 3) / 4;
-      if (base64Size > 600 * 1024) {
-        setError('Image is too large even after compression. Please use a smaller image.');
-        return;
-      }
+      // Compress image (800x800 max for price images, quality 0.75, max 450KB)
+      const compressedDataUrl = await compressImage(file, 800, 800, 0.75, 450);
       
       setImage(compressedDataUrl);
       setError(null);

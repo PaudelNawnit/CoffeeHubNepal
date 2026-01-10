@@ -130,16 +130,8 @@ export const Profile = () => {
 
     setUploadingImage(true);
     try {
-      // Compress image for avatar (512x512 max, quality 0.7 to keep size small for Cosmos DB)
-      const compressedDataUrl = await compressImage(file, 512, 512, 0.7);
-      
-      // Check final base64 size (max ~400KB to leave room for other user data in Cosmos DB)
-      const base64Size = (compressedDataUrl.length * 3) / 4;
-      if (base64Size > 400 * 1024) {
-        alert('Image is too large even after compression. Please use a smaller image.');
-        setUploadingImage(false);
-        return;
-      }
+      // Compress image for avatar (512x512 max, quality 0.7, max 300KB to leave room for other user data in Cosmos DB)
+      const compressedDataUrl = await compressImage(file, 512, 512, 0.7, 300);
 
       try {
         const result = await authService.updateProfile({ avatar: compressedDataUrl });
