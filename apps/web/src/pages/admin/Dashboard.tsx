@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, ShieldCheck, AlertTriangle, UserCheck, ArrowLeft } from 'lucide-react';
+import { Users, ShieldCheck, AlertTriangle, UserCheck, ArrowLeft, DollarSign } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { adminService } from '@/services/admin.service';
@@ -92,7 +92,7 @@ export const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Button 
           variant="outline" 
           className="p-6 flex flex-col items-center gap-2 hover:bg-[#F8F5F2] transition-colors" 
@@ -125,6 +125,17 @@ export const Dashboard = () => {
         >
           <AlertTriangle size={32} className="text-[#6F4E37]" />
           <span className="font-black text-sm">Reports</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="p-6 flex flex-col items-center gap-2 hover:bg-[#F8F5F2] transition-colors" 
+          onClick={() => {
+            setCurrentPage('admin');
+            setSubPage('prices');
+          }}
+        >
+          <DollarSign size={32} className="text-[#6F4E37]" />
+          <span className="font-black text-sm">Manage Prices</span>
         </Button>
       </div>
 

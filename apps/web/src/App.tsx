@@ -36,6 +36,7 @@ import { Dashboard } from './pages/admin/Dashboard';
 import { Verifications } from './pages/admin/Verifications';
 import { Reports } from './pages/admin/Reports';
 import { Users } from './pages/admin/Users';
+import { Prices } from './pages/admin/Prices';
 import { MyListings } from './pages/profile/MyListings';
 import { MyJobs } from './pages/jobs/MyJobs';
 import { Certifications } from './pages/profile/Certifications';
@@ -156,6 +157,7 @@ const AppContent = () => {
     if (subPage === 'verifications') return <Verifications />;
     if (subPage === 'reports') return <Reports />;
     if (subPage === 'users') return <Users />;
+    if (subPage === 'prices') return <Prices />;
     return <Dashboard />;
   }
 
