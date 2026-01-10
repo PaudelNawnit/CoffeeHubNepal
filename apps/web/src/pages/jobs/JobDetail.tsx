@@ -3,14 +3,13 @@ import { ArrowLeft, MapPin, Briefcase, Phone, Mail, CheckCircle, User, Check, X 
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
-import { MOCK_JOBS, MOCK_APPLICATIONS } from '@/utils/mockData';
 import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
-import { jobService, Application } from '@/services/job.service';
+import { jobService, Application, Job } from '@/services/job.service';
 import { t } from '@/i18n';
 
 interface JobDetailProps {
-  jobId: number;
+  jobId: string;
   onBack: () => void;
   onApply?: () => void;
 }
@@ -18,42 +17,62 @@ interface JobDetailProps {
 export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
   const { user } = useAuth();
   const { language, setSubPage } = useApp();
-  const job = MOCK_JOBS.find(j => j.id === jobId) || MOCK_JOBS[0];
+  const [job, setJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [processingApp, setProcessingApp] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [jobLoading, setJobLoading] = useState(true);
+  const [processingApp, setProcessingApp] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
 
-  const isJobCreator = user && (user.mongoId === job.createdBy || user.id.toString() === job.createdBy);
+  useEffect(() => {
+    loadJob();
+  }, [jobId]);
+
+  const loadJob = async () => {
+    setJobLoading(true);
+    try {
+      const jobData = await jobService.getJob(jobId);
+      setJob(jobData);
+    } catch (error) {
+      console.error('Failed to load job:', error);
+      setJob(null);
+    } finally {
+      setJobLoading(false);
+    }
+  };
+
+  const isJobCreator = user && job && (user.mongoId === job.createdBy || user.id?.toString() === job.createdBy);
 
   useEffect(() => {
-    if (isJobCreator) {
+    if (isJobCreator && jobId) {
       loadApplications();
     }
   }, [jobId, isJobCreator]);
 
   const loadApplications = async () => {
+    if (!jobId) return;
     setLoading(true);
     try {
-      // In real app: const apps = await jobService.getApplications(jobId);
-      const apps = MOCK_APPLICATIONS.filter(app => app.jobId === jobId);
+      const apps = await jobService.getApplications(jobId);
       setApplications(apps);
     } catch (error) {
       console.error('Failed to load applications:', error);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAccept = async (applicationId: number) => {
+  const handleAccept = async (applicationId: string) => {
+    if (!jobId) return;
     setProcessingApp(applicationId);
     try {
-      await jobService.acceptApplication(applicationId);
+      await jobService.acceptApplication(jobId, applicationId);
       // Update local state
       setApplications(prev => prev.map(app => 
-        app.id === applicationId ? { ...app, status: 'accepted' as const } : app
+        (app._id || app.id) === applicationId ? { ...app, status: 'accepted' as const } : app
       ));
     } catch (error) {
       console.error('Failed to accept application:', error);
@@ -62,13 +81,14 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
     }
   };
 
-  const handleReject = async (applicationId: number) => {
+  const handleReject = async (applicationId: string) => {
+    if (!jobId) return;
     setProcessingApp(applicationId);
     try {
-      await jobService.rejectApplication(applicationId);
+      await jobService.rejectApplication(jobId, applicationId);
       // Update local state
       setApplications(prev => prev.map(app => 
-        app.id === applicationId ? { ...app, status: 'rejected' as const } : app
+        (app._id || app.id) === applicationId ? { ...app, status: 'rejected' as const } : app
       ));
     } catch (error) {
       console.error('Failed to reject application:', error);
@@ -91,7 +111,7 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
   };
 
   const handleApply = async () => {
-    if (!user) {
+    if (!user || !job || !jobId) {
       setApplyError('Please log in to apply for this job');
       setTimeout(() => {
         setSubPage('login');
@@ -104,27 +124,42 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
     setApplySuccess(false);
 
     try {
-      const result = await jobService.applyToJob(jobId, {
+      await jobService.applyToJob(jobId, {
         message: `Application for ${job.title} at ${job.farm}`
       });
       
-      if (result.success) {
-        setApplySuccess(true);
-        // Reload applications if user is job creator
-        if (isJobCreator) {
-          loadApplications();
-        }
-        // Call the optional onApply callback if provided
-        onApply?.();
-      } else {
-        setApplyError(result.message || 'Failed to submit application');
+      setApplySuccess(true);
+      // Reload applications if user is job creator
+      if (isJobCreator) {
+        loadApplications();
       }
+      // Call the optional onApply callback if provided
+      onApply?.();
     } catch (error: any) {
       setApplyError(error.message || 'Failed to submit application. Please try again.');
     } finally {
       setApplying(false);
     }
   };
+
+  if (jobLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8F5F2] pb-32 flex items-center justify-center">
+        <p className="text-gray-500">Loading job...</p>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-[#F8F5F2] pb-32 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">Job not found</p>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32">
@@ -243,8 +278,10 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
               <p className="text-gray-500 text-center py-4">{t(language, 'jobs.noApplications')}</p>
             ) : (
               <div className="space-y-4">
-                {applications.map(application => (
-                  <div key={application.id} className="border border-[#EBE3D5] rounded-xl p-4 bg-white">
+                {applications.map(application => {
+                  const appId = application._id || application.id || '';
+                  return (
+                  <div key={appId} className="border border-[#EBE3D5] rounded-xl p-4 bg-white">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3 flex-1">
                         <div className="w-12 h-12 bg-[#F5EFE6] rounded-xl flex items-center justify-center">
@@ -278,16 +315,16 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
                           <Button
                             variant="outline"
                             className="flex-1 text-green-600 border-green-600"
-                            onClick={() => handleAccept(application.id)}
-                            disabled={processingApp === application.id}
+                            onClick={() => handleAccept(appId)}
+                            disabled={processingApp === appId}
                           >
                             <Check size={14} /> {t(language, 'jobs.accept')}
                           </Button>
                           <Button
                             variant="outline"
                             className="flex-1 text-red-600 border-red-600"
-                            onClick={() => handleReject(application.id)}
-                            disabled={processingApp === application.id}
+                            onClick={() => handleReject(appId)}
+                            disabled={processingApp === appId}
                           >
                             <X size={14} /> {t(language, 'jobs.reject')}
                           </Button>
@@ -311,7 +348,8 @@ export const JobDetail = ({ jobId, onBack, onApply }: JobDetailProps) => {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </Card>

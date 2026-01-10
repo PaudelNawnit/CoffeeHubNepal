@@ -187,8 +187,12 @@ const AppContent = () => {
     if (subPage === 'create-notice') {
       return <CreateNotice onBack={handleBack} />;
     }
-    if (subPage === 'job-detail' && selectedId) {
-      return <JobDetail jobId={selectedId} onBack={handleBack} />;
+    if (subPage === 'job-detail') {
+      // Get jobId from sessionStorage (jobs use string IDs)
+      const jobId = sessionStorage.getItem('jobDetailId') || (selectedId ? selectedId.toString() : '');
+      if (jobId) {
+        return <JobDetail jobId={jobId} onBack={handleBack} />;
+      }
     }
     if (subPage === 'create-job') {
       return <CreateJob onBack={handleBack} />;

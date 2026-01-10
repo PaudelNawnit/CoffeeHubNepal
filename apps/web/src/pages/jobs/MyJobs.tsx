@@ -5,8 +5,7 @@ import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import { Job } from '@/services/job.service';
-import { MOCK_JOBS, MOCK_APPLICATIONS } from '@/utils/mockData';
+import { Job, jobService } from '@/services/job.service';
 import { t } from '@/i18n';
 
 export const MyJobs = () => {
@@ -14,7 +13,7 @@ export const MyJobs = () => {
   const { user } = useAuth();
   const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [applicationCounts, setApplicationCounts] = useState<Record<number, number>>({});
+  const [applicationCounts, setApplicationCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadMyJobs();
@@ -24,18 +23,24 @@ export const MyJobs = () => {
     setLoading(true);
     try {
       if (user?.mongoId || user?.id) {
-        // In real app, use: const jobs = await jobService.getMyJobs(user.mongoId || user.id.toString());
-        // For now, filter mock jobs by createdBy
         const userId = user.mongoId || user.id.toString();
-        const filteredJobs = MOCK_JOBS.filter(job => job.createdBy === userId);
-        setMyJobs(filteredJobs);
+        const jobs = await jobService.getMyJobs(userId);
+        setMyJobs(jobs);
 
         // Load application counts for each job
-        const counts: Record<number, number> = {};
-        filteredJobs.forEach(job => {
-          const applications = MOCK_APPLICATIONS.filter(app => app.jobId === job.id);
-          counts[job.id] = applications.length;
-        });
+        const counts: Record<string, number> = {};
+        for (const job of jobs) {
+          try {
+            const jobId = job._id || job.id || '';
+            if (jobId) {
+              const applications = await jobService.getApplications(jobId);
+              counts[jobId] = applications.length;
+            }
+          } catch (error) {
+            console.error(`Failed to load applications for job ${job._id || job.id}:`, error);
+            counts[job._id || job.id || ''] = 0;
+          }
+        }
         setApplicationCounts(counts);
       } else {
         setMyJobs([]);
@@ -48,8 +53,9 @@ export const MyJobs = () => {
     }
   };
 
-  const handleJobClick = (jobId: number) => {
-    navigate('job-detail', jobId);
+  const handleJobClick = (jobId: string) => {
+    sessionStorage.setItem('jobDetailId', jobId);
+    navigate('job-detail', 0);
   };
 
   return (
@@ -81,8 +87,10 @@ export const MyJobs = () => {
             </Button>
           </Card>
         ) : (
-          myJobs.map(job => (
-            <Card key={job.id} className="overflow-hidden">
+          myJobs.map(job => {
+            const jobId = job._id || job.id || '';
+            return (
+            <Card key={jobId} className="overflow-hidden">
               <div className="flex gap-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#6F4E37] to-[#3A7D44] rounded-2xl flex items-center justify-center text-white font-black text-xl shrink-0">
                   {job.farm.substring(0, 2).toUpperCase()}
@@ -95,9 +103,9 @@ export const MyJobs = () => {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Badge>{job.type}</Badge>
-                      {applicationCounts[job.id] !== undefined && (
+                      {applicationCounts[jobId] !== undefined && (
                         <Badge variant="primary" className="text-xs">
-                          {applicationCounts[job.id]} {t(language, 'jobs.applicationCount')}
+                          {applicationCounts[jobId]} {t(language, 'jobs.applicationCount')}
                         </Badge>
                       )}
                     </div>
@@ -110,14 +118,15 @@ export const MyJobs = () => {
                   <Button 
                     variant="outline" 
                     className="w-full text-xs py-2" 
-                    onClick={() => handleJobClick(job.id)}
+                    onClick={() => handleJobClick(jobId)}
                   >
                     <Eye size={14} /> {t(language, 'jobs.viewApplications')}
                   </Button>
                 </div>
               </div>
             </Card>
-          ))
+            );
+          })
         )}
       </div>
     </div>

@@ -2,15 +2,7 @@ import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
 import { MapPin } from 'lucide-react';
-
-interface Job {
-  id: number;
-  title: string;
-  farm: string;
-  location: string;
-  pay: string;
-  type: string;
-}
+import { Job } from '@/services/job.service';
 
 interface JobCardProps {
   job: Job;

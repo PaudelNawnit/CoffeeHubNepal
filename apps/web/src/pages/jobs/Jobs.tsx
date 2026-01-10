@@ -33,8 +33,11 @@ export const Jobs = () => {
     }
   };
   
-  const handleJobClick = (id: string | number) => {
-    navigate('job-detail', typeof id === 'string' ? id : id.toString());
+  const handleJobClick = (id: string | number | undefined) => {
+    if (!id) return;
+    const jobId = typeof id === 'string' ? id : id.toString();
+    sessionStorage.setItem('jobDetailId', jobId);
+    navigate('job-detail', 0);
   };
 
   return (
