@@ -175,11 +175,11 @@ export const Users = () => {
     if (user.avatar) {
       return user.avatar;
     }
-    // Generate a colored avatar based on user's name/email
-    const name = user.name || user.email;
-    const initial = name.charAt(0).toUpperCase();
     return null; // Return null to show initial-based avatar
   };
+  
+  // All roles for filter dropdown
+  const roles = ['farmer', 'roaster', 'trader', 'exporter', 'expert', 'admin', 'moderator'];
 
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32">
