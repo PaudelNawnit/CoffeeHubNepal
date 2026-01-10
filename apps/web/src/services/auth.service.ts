@@ -129,23 +129,45 @@ export const authService = {
         headers['x-captcha-token'] = 'captcha-disabled';
       }
 
+      const requestBody = {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        phone: data.phone,
+        location: data.location,
+        role: data.role,
+      };
+
+      console.log('[Auth Service] Registering user:', { email: data.email, role: data.role });
+      console.log('[Auth Service] API URL:', `${API_BASE_URL}/auth/signup`);
+
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          name: data.name,
-          phone: data.phone,
-          location: data.location,
-          role: data.role,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const result = await response.json();
+      console.log('[Auth Service] Response status:', response.status, response.statusText);
+      console.log('[Auth Service] Response headers:', Object.fromEntries(response.headers.entries()));
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      let result: any;
+      
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('[Auth Service] Non-JSON response:', text);
+        throw new Error(`Server returned an invalid response. Please try again later. (Status: ${response.status})`);
+      }
+
+      console.log('[Auth Service] Response data:', result);
 
       if (!response.ok) {
         const error: ApiError = result;
+        console.error('[Auth Service] Registration error:', error);
+        
         if (error.code === 'EMAIL_IN_USE') {
           throw new Error('This email is already registered. Please use a different email or try logging in instead.');
         }
@@ -153,7 +175,8 @@ export const authService = {
           throw new Error('Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.');
         }
         if (error.code === 'VALIDATION_ERROR') {
-          throw new Error('Please check your information and try again. Make sure your email is valid and password meets the requirements.');
+          const details = error.details ? ` Details: ${JSON.stringify(error.details)}` : '';
+          throw new Error(`Please check your information and try again. Make sure your email is valid and password meets the requirements.${details}`);
         }
         if (error.code === 'CAPTCHA_REQUIRED') {
           throw new Error('CAPTCHA verification is required. Please complete the CAPTCHA.');
@@ -164,7 +187,7 @@ export const authService = {
         if (error.code === 'ACCOUNT_RATE_LIMITED') {
           throw new Error('Too many registration attempts. Please wait a moment and try again.');
         }
-        throw new Error(error.error || 'Registration failed. Please try again.');
+        throw new Error(error.error || error.message || 'Registration failed. Please try again.');
       }
 
       // Store token and user
@@ -188,15 +211,26 @@ export const authService = {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(userWithDefaults));
 
+      console.log('[Auth Service] Registration successful:', { email: userWithDefaults.email, role: userWithDefaults.role });
+      
       return {
         token: result.token,
         user: userWithDefaults,
       };
     } catch (error) {
+      console.error('[Auth Service] Registration catch error:', error);
+      
       if (error instanceof Error) {
+        // Re-throw with the original error message
         throw error;
       }
-      throw new Error('Network error. Please check if the API server is running.');
+      
+      // Handle network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your internet connection and try again.');
+      }
+      
+      throw new Error('Registration failed. Please try again later.');
     }
   },
 

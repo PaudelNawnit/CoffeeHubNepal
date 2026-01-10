@@ -132,8 +132,15 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       setSubPage(null);
       onSuccess?.();
     } catch (err: any) {
-      setSubmitError(err.message || 'Registration failed. Please check your information and try again.');
+      console.error('Registration error in component:', err);
+      const errorMessage = err?.message || err?.error || 'Registration failed. Please check your information and try again.';
+      setSubmitError(errorMessage);
       setSuccess(false);
+      
+      // Scroll to top to show error
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
     } finally {
       setIsLoading(false);
     }
