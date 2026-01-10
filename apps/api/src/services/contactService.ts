@@ -26,6 +26,7 @@ export interface UpdateContactData {
  */
 export const createContact = async (data: CreateContactData): Promise<ContactDocument> => {
   const contact = new Contact({
+    docType: 'contact', // Distinguish from blog reports in shared collection
     name: data.name,
     email: data.email,
     phone: data.phone || undefined, // Convert empty string/null to undefined
@@ -47,7 +48,8 @@ export const getContacts = async (filters?: ContactFilters) => {
   const limit = Math.min(filters?.limit || 20, 50);
   const skip = (page - 1) * limit;
 
-  const query: any = {};
+  // Always filter by docType to get only contact submissions from shared collection
+  const query: any = { docType: 'contact' };
   
   if (filters?.status) {
     query.status = filters.status;
@@ -81,7 +83,7 @@ export const getContacts = async (filters?: ContactFilters) => {
  * Get a single contact by ID
  */
 export const getContactById = async (id: string): Promise<ContactDocument | null> => {
-  return Contact.findById(id);
+  return Contact.findOne({ _id: id, docType: 'contact' });
 };
 
 /**
@@ -92,7 +94,7 @@ export const updateContact = async (
   data: UpdateContactData,
   userId: string
 ): Promise<ContactDocument> => {
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findOne({ _id: id, docType: 'contact' });
   
   if (!contact) {
     throw new Error('CONTACT_NOT_FOUND');
@@ -125,13 +127,13 @@ export const updateContact = async (
  * Delete a contact (admin only)
  */
 export const deleteContact = async (id: string): Promise<void> => {
-  const contact = await Contact.findById(id);
+  const contact = await Contact.findOne({ _id: id, docType: 'contact' });
   
   if (!contact) {
     throw new Error('CONTACT_NOT_FOUND');
   }
 
-  await Contact.findByIdAndDelete(id);
+  await Contact.deleteOne({ _id: id, docType: 'contact' });
   console.log(`[Contact] Contact ${id} deleted`);
 };
 
@@ -139,11 +141,13 @@ export const deleteContact = async (id: string): Promise<void> => {
  * Get contact stats for admin dashboard
  */
 export const getContactStats = async () => {
+  const baseQuery = { docType: 'contact' };
+  
   const [open, pending, closed, total] = await Promise.all([
-    Contact.countDocuments({ status: 'open' }),
-    Contact.countDocuments({ status: 'pending' }),
-    Contact.countDocuments({ status: 'closed' }),
-    Contact.countDocuments({})
+    Contact.countDocuments({ ...baseQuery, status: 'open' }),
+    Contact.countDocuments({ ...baseQuery, status: 'pending' }),
+    Contact.countDocuments({ ...baseQuery, status: 'closed' }),
+    Contact.countDocuments(baseQuery)
   ]);
 
   return { open, pending, closed, total };

@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export type ContactStatus = 'open' | 'pending' | 'closed';
 
 export interface ContactDocument extends Document {
+  docType: 'contact';
   name: string;
   email: string;
   phone?: string;
@@ -19,6 +20,7 @@ export interface ContactDocument extends Document {
 
 const contactSchema = new Schema<ContactDocument>(
   {
+    docType: { type: String, default: 'contact', required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String },
@@ -37,10 +39,6 @@ const contactSchema = new Schema<ContactDocument>(
   { timestamps: true }
 );
 
-// Note: Indexes are managed in Azure Cosmos DB portal, not in code
-// contactSchema.index({ status: 1, createdAt: -1 });
-// contactSchema.index({ email: 1 });
-// contactSchema.index({ createdAt: -1 });
-
-export const Contact = mongoose.model<ContactDocument>('Contact', contactSchema);
+// Use the existing 'reports' collection to avoid exceeding Cosmos DB throughput limits
+export const Contact = mongoose.model<ContactDocument>('Contact', contactSchema, 'reports');
 

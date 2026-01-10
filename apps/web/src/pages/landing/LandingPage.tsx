@@ -1,4 +1,4 @@
-import { ArrowRight, Users, TrendingUp, Shield, Store, Briefcase, CheckCircle, Coffee, Leaf, Award } from 'lucide-react';
+import { ArrowRight, Users, TrendingUp, Shield, Store, Briefcase, CheckCircle, Coffee } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCountUp } from '@/hooks/useCountUp';
 import logoImage from '@/assets/images/logo/coffeelogo.png';
 import coffeeImage from '@/assets/images/coffee.png';
+import farmersHandshakeImage from '@/assets/images/landing/farmers-handshake.png';
 
 export const LandingPage = () => {
   const { navigate } = useApp();
@@ -315,36 +316,12 @@ export const LandingPage = () => {
               </div>
             </div>
 
-            <div className="p-8 lg:p-12 bg-coffee-dark text-white border-2 border-coffee-dark rounded-lg">
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-white/10 border border-white/20 rounded-md flex items-center justify-center">
-                    <Leaf className="text-white" size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-heading font-semibold text-white">Verified Farmers</h3>
-                    <p className="text-white/80 text-sm font-body">Trusted by the community</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-white/10 border border-white/20 rounded-md flex items-center justify-center">
-                    <Award className="text-white" size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-heading font-semibold text-white">Expert Support</h3>
-                    <p className="text-white/80 text-sm font-body">Get help from certified experts</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-white/10 border border-white/20 rounded-md flex items-center justify-center">
-                    <TrendingUp className="text-white" size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-heading font-semibold text-white">Real-time Data</h3>
-                    <p className="text-white/80 text-sm font-body">Make informed decisions</p>
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl border-2 border-coffee-dark/10">
+              <img 
+                src={farmersHandshakeImage} 
+                alt="Coffee farmers connecting and trading" 
+                className="w-full h-auto object-cover"
+              />
             </div>
           </div>
         </div>
