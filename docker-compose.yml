@@ -5,13 +5,13 @@ services:
       dockerfile: Dockerfile
     container_name: coffeehubnepal
     ports:
-      - "${PORT:-4000}:4000"
+      - "${HOST_PORT:-3000}:${CONTAINER_PORT:-4000}"
     environment:
       - NODE_ENV=production
-      - PORT=4000
+      - PORT=${CONTAINER_PORT:-4000}
       - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - CLIENT_ORIGIN=${CLIENT_ORIGIN:-http://localhost:4000}
+      - CLIENT_ORIGIN=${CLIENT_ORIGIN:-http://localhost:3000}
       - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
       - LOCKOUT_THRESHOLD=${LOCKOUT_THRESHOLD:-5}
       - LOCKOUT_WINDOW_MINUTES=${LOCKOUT_WINDOW_MINUTES:-15}
