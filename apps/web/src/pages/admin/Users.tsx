@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Search, User as UserIcon, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Search, User as UserIcon, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
+import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { adminService, User } from '@/services/admin.service';
 import { useAuth } from '@/context/AuthContext';
@@ -32,11 +33,34 @@ export const Users = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [newRole, setNewRole] = useState<string>('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isAdmin = currentUser?.role === 'admin';
   const isModerator = currentUser?.role === 'moderator';
+  
+  // Roles that moderators can assign (excluding admin and moderator)
+  const moderatorAssignableRoles = ['farmer', 'roaster', 'trader', 'exporter', 'expert'];
+  // All roles for admin
+  const allRoles = ['farmer', 'roaster', 'trader', 'exporter', 'expert', 'admin', 'moderator'];
+  
+  // Get assignable roles based on current user's role
+  const getAssignableRoles = (targetUser: User) => {
+    if (isAdmin) {
+      return allRoles;
+    }
+    if (isModerator) {
+      // Moderators cannot change admin or moderator roles
+      if (targetUser.role === 'admin' || targetUser.role === 'moderator') {
+        return []; // Can't modify admin/moderator users
+      }
+      return moderatorAssignableRoles;
+    }
+    return [];
+  };
 
   useEffect(() => {
     loadUsers();
@@ -103,6 +127,36 @@ export const Users = () => {
     }
   };
 
+  const handleDeleteUser = (user: User) => {
+    // Cannot delete admins or self
+    if (user.role === 'admin') {
+      alert('Cannot delete admin users');
+      return;
+    }
+    if (user._id === currentUser?.mongoId) {
+      alert('Cannot delete your own account');
+      return;
+    }
+    setUserToDelete(user);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await adminService.deleteUser(userToDelete._id);
+      await loadUsers();
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete user');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin':
@@ -116,7 +170,16 @@ export const Users = () => {
     }
   };
 
-  const roles = ['farmer', 'roaster', 'trader', 'exporter', 'expert', 'admin', 'moderator'];
+  // Generate avatar URL or use user's avatar
+  const getUserAvatar = (user: User) => {
+    if (user.avatar) {
+      return user.avatar;
+    }
+    // Generate a colored avatar based on user's name/email
+    const name = user.name || user.email;
+    const initial = name.charAt(0).toUpperCase();
+    return null; // Return null to show initial-based avatar
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32">
@@ -190,58 +253,103 @@ export const Users = () => {
           </Card>
         ) : (
           <div className="space-y-3">
-            {users.map((user) => (
+            {users.map((user) => {
+              const avatar = getUserAvatar(user);
+              const assignableRoles = getAssignableRoles(user);
+              const canModifyUser = assignableRoles.length > 0;
+              
+              return (
               <Card key={user._id} className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-black text-lg">{user.name || user.email}</h3>
-                      {user.verified && <CheckCircle className="text-blue-500" size={16} fill="currentColor" />}
-                      {!user.verified && <XCircle className="text-gray-300" size={16} />}
+                  <div className="flex items-center gap-4 flex-1">
+                    {/* User Avatar */}
+                    <div className="flex-shrink-0">
+                      {avatar ? (
+                        <img 
+                          src={avatar} 
+                          alt={user.name || user.email}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-[#EBE3D5]"
+                          onError={(e) => {
+                            // Fallback to initial avatar on error
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+                        user.role === 'admin' ? 'bg-red-500' : 
+                        user.role === 'moderator' ? 'bg-purple-500' : 
+                        'bg-[#6F4E37]'
+                      } ${avatar ? 'hidden' : ''}`}>
+                        {(user.name || user.email).charAt(0).toUpperCase()}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{user.email}</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
-                        {user.role}
-                      </Badge>
-                      {user.phone && (
-                        <span className="text-xs text-gray-500">Phone: {user.phone}</span>
-                      )}
-                      {user.location && (
-                        <span className="text-xs text-gray-500">Location: {user.location}</span>
-                      )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="font-black text-lg truncate">{user.name || user.email}</h3>
+                        {user.verified && <CheckCircle className="text-blue-500 flex-shrink-0" size={16} fill="currentColor" />}
+                        {!user.verified && <XCircle className="text-gray-300 flex-shrink-0" size={16} />}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2 truncate">{user.email}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
+                          {user.role}
+                        </Badge>
+                        {user.phone && (
+                          <span className="text-xs text-gray-500">Phone: {user.phone}</span>
+                        )}
+                        {user.location && (
+                          <span className="text-xs text-gray-500">Location: {user.location}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {isAdmin && (
+                  {/* Role management - Admin can manage all, Moderator can manage non-admin/moderator users */}
+                  {(isAdmin || isModerator) && (
                     <div className="flex items-center gap-2">
-                      <select
-                        value={user.role}
-                        onChange={(e) => {
-                          const newRoleValue = e.target.value;
-                          console.log('[Users] Role dropdown changed:', { userId: user._id, currentRole: user.role, newRole: newRoleValue });
-                          if (newRoleValue !== user.role) {
-                            handleRoleChange(user, newRoleValue);
-                          }
-                        }}
-                        disabled={isUpdatingRole || loading}
-                        className="px-3 py-1.5 text-sm border border-[#EBE3D5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6F4E37] bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {roles.map(role => (
-                          <option key={role} value={role}>
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </option>
-                        ))}
-                      </select>
+                      {canModifyUser ? (
+                        <select
+                          value={user.role}
+                          onChange={(e) => {
+                            const newRoleValue = e.target.value;
+                            console.log('[Users] Role dropdown changed:', { userId: user._id, currentRole: user.role, newRole: newRoleValue });
+                            if (newRoleValue !== user.role) {
+                              handleRoleChange(user, newRoleValue);
+                            }
+                          }}
+                          disabled={isUpdatingRole || loading || isDeleting}
+                          className="px-3 py-1.5 text-sm border border-[#EBE3D5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6F4E37] bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {assignableRoles.map(role => (
+                            <option key={role} value={role}>
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Badge variant="primary" className="text-xs">
+                          {user.role === 'admin' || user.role === 'moderator' ? 'Protected' : 'View Only'}
+                        </Badge>
+                      )}
+                      {/* Delete button - only for admins, non-admin users, and not self */}
+                      {isAdmin && user.role !== 'admin' && user._id !== currentUser?.mongoId && (
+                        <Button
+                          variant="outline"
+                          className="px-2 py-1.5 text-red-600 hover:bg-red-50 hover:border-red-200"
+                          onClick={() => handleDeleteUser(user)}
+                          disabled={isDeleting || isUpdatingRole || loading}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      )}
                     </div>
-                  )}
-                  {isModerator && !isAdmin && (
-                    <Badge variant="primary" className="text-xs">
-                      View Only
-                    </Badge>
                   )}
                 </div>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
@@ -262,6 +370,23 @@ export const Users = () => {
           }
         }}
         isLoading={isUpdatingRole}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title="Delete User"
+        message={`Are you sure you want to permanently delete ${userToDelete?.name || userToDelete?.email}? This action cannot be undone. All their data including posts, listings, and jobs will be orphaned.`}
+        confirmText="Delete User"
+        cancelText="Cancel"
+        variant="danger"
+        onConfirm={confirmDeleteUser}
+        onCancel={() => {
+          if (!isDeleting) {
+            setShowDeleteDialog(false);
+            setUserToDelete(null);
+          }
+        }}
+        isLoading={isDeleting}
       />
     </div>
   );

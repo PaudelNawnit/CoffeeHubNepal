@@ -5,6 +5,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  avatar?: string;
   role: 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert' | 'admin' | 'moderator';
   phone?: string;
   location?: string;
@@ -262,6 +263,33 @@ export const adminService = {
     }
 
     return response.json();
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        throw new Error('Failed to delete user');
+      }
+      
+      if (response.status === 404) {
+        throw new Error(result.message || 'User not found');
+      }
+      if (response.status === 400) {
+        throw new Error(result.message || 'Cannot delete this user');
+      }
+      if (response.status === 403) {
+        throw new Error(result.message || 'Admin access required');
+      }
+      throw new Error(result.message || result.error || 'Failed to delete user');
+    }
   }
 };
 

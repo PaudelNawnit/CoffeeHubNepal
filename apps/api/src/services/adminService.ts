@@ -100,6 +100,33 @@ export const updateUserRole = async (
   return savedUser;
 };
 
+/**
+ * Delete a user (admin only)
+ * Cannot delete admin users or self
+ */
+export const deleteUser = async (
+  userId: string,
+  adminId: string
+): Promise<void> => {
+  // Prevent self-deletion
+  if (userId === adminId) {
+    throw new Error('CANNOT_DELETE_SELF');
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  // Prevent deletion of admin users (extra safety)
+  if (user.role === 'admin') {
+    throw new Error('CANNOT_DELETE_ADMIN');
+  }
+
+  await User.findByIdAndDelete(userId);
+  console.log(`[Admin] User deleted: ${user.email} (${userId}) by admin ${adminId}`);
+};
+
 export const getPendingVerifications = async () => {
   // Return users with verified: false, null, or undefined (not verified)
   // This ensures we catch all unverified users regardless of how the field was set

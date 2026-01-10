@@ -8,6 +8,7 @@ import {
   getAllUsers,
   getUserById,
   updateUserRole,
+  deleteUser,
   getPendingVerifications,
   getPendingRoleChangeRequests,
   getUserStats,
@@ -60,17 +61,53 @@ router.get('/users/:id', validateObjectId(), requireAdminOrModerator, async (req
   }
 });
 
-// Update user role (admin only)
+// Update user role (admin can assign any role, moderator can only assign non-admin/moderator roles)
 const updateRoleSchema = z.object({
   role: z.enum(['farmer', 'roaster', 'trader', 'exporter', 'expert', 'admin', 'moderator'])
 });
 
-router.put('/users/:id/role', validateObjectId(), requireAdmin, validate(updateRoleSchema), async (req: AuthRequest, res) => {
+// Roles that moderators are allowed to assign
+const MODERATOR_ASSIGNABLE_ROLES = ['farmer', 'roaster', 'trader', 'exporter', 'expert'];
+
+router.put('/users/:id/role', validateObjectId(), requireAdminOrModerator, validate(updateRoleSchema), async (req: AuthRequest, res) => {
   try {
     const { role } = req.body;
     const userId = req.params.id;
     
-    console.log(`[Admin Route] Updating user ${userId} role to ${role} by admin ${req.userId}`);
+    // Get the requesting user to check their role
+    const requestingUser = await User.findById(req.userId);
+    if (!requestingUser) {
+      return res.status(401).json({ error: 'UNAUTHORIZED', message: 'User not found' });
+    }
+    
+    // Get the target user to check their current role
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'User not found' });
+    }
+    
+    const isAdmin = requestingUser.role === 'admin';
+    const isModerator = requestingUser.role === 'moderator';
+    
+    // Moderator restrictions
+    if (isModerator && !isAdmin) {
+      // Moderators cannot modify admin or moderator users
+      if (targetUser.role === 'admin' || targetUser.role === 'moderator') {
+        return res.status(403).json({ 
+          error: 'PERMISSION_DENIED', 
+          message: 'Moderators cannot modify admin or moderator users' 
+        });
+      }
+      // Moderators cannot assign admin or moderator roles
+      if (!MODERATOR_ASSIGNABLE_ROLES.includes(role)) {
+        return res.status(403).json({ 
+          error: 'PERMISSION_DENIED', 
+          message: 'Moderators can only assign farmer, roaster, trader, exporter, or expert roles' 
+        });
+      }
+    }
+    
+    console.log(`[Admin Route] Updating user ${userId} role to ${role} by ${requestingUser.role} ${req.userId}`);
     
     const user = await updateUserRole(userId, role, req.userId!);
     
@@ -105,6 +142,29 @@ router.put('/users/:id/role', validateObjectId(), requireAdmin, validate(updateR
       return res.status(500).json({ error: 'FAILED_TO_UPDATE_ROLE', message: 'Failed to persist role update' });
     }
     return res.status(500).json({ error: 'FAILED_TO_UPDATE_ROLE', message: err || 'Unknown error occurred' });
+  }
+});
+
+// Delete user (admin only)
+router.delete('/users/:id', validateObjectId(), requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.params.id;
+    await deleteUser(userId, req.userId!);
+    return res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    const err = (error as Error).message;
+    console.error('[Admin Route] Delete user error:', error);
+    
+    if (err === 'USER_NOT_FOUND') {
+      return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'User not found' });
+    }
+    if (err === 'CANNOT_DELETE_SELF') {
+      return res.status(400).json({ error: 'CANNOT_DELETE_SELF', message: 'You cannot delete your own account' });
+    }
+    if (err === 'CANNOT_DELETE_ADMIN') {
+      return res.status(403).json({ error: 'CANNOT_DELETE_ADMIN', message: 'Cannot delete admin users' });
+    }
+    return res.status(500).json({ error: 'FAILED_TO_DELETE_USER', message: err || 'Unknown error occurred' });
   }
 });
 
