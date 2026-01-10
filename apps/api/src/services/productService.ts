@@ -47,7 +47,10 @@ export const getProducts = async (filters?: {
   const limit = Math.min(filters?.limit || 20, 50);
   const skip = (page - 1) * limit;
 
-  const query: any = { active: true, sold: false };
+  const query: any = {
+    active: { $ne: false }, // active is true or undefined (defaults to true)
+    sold: { $ne: true } // sold is false or undefined (defaults to false)
+  };
 
   if (filters?.category) {
     query.category = filters.category;
@@ -70,7 +73,7 @@ export const getProducts = async (filters?: {
 
   const [products, total] = await Promise.all([
     Product.find(query)
-      .select('title description price unit quantity location category images sellerName verified createdAt updatedAt')
+      .select('title description price unit quantity location category images sellerName sellerEmail verified active sold createdAt updatedAt _id')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -78,8 +81,15 @@ export const getProducts = async (filters?: {
     Product.countDocuments(query)
   ]);
 
+  // Add _id as id for frontend compatibility
+  const productsWithId = products.map((product: any) => ({
+    ...product,
+    id: product._id.toString(),
+    _id: product._id.toString()
+  }));
+
   return {
-    products,
+    products: productsWithId,
     pagination: {
       page,
       limit,

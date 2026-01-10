@@ -77,7 +77,14 @@ router.post('/', authenticate, validate(createProductSchema), async (req: AuthRe
       req.body
     );
     
-    return res.status(201).json(product);
+    // Convert to plain object with string IDs
+    const productObj = product.toObject();
+    return res.status(201).json({
+      ...productObj,
+      _id: productObj._id.toString(),
+      id: productObj._id.toString(),
+      sellerId: productObj.sellerId.toString()
+    });
   } catch (error: any) {
     console.error('Create product error:', error);
     return res.status(500).json({ 

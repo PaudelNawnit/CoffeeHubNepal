@@ -29,9 +29,9 @@ export const Marketplace = () => {
         search: searchQuery || undefined,
         limit: 100 // Get all active listings
       });
-      // Filter out sold items and only show active/verified products
+      // The API already filters by active and sold, but we can add extra safety
       const activeListings = response.products.filter(
-        (product) => !product.sold && (product.active !== false)
+        (product) => product.sold !== true && product.active !== false
       );
       setListings(activeListings);
     } catch (err: any) {

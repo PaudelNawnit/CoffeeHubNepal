@@ -4,6 +4,8 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { compressImage } from '@/utils/imageCompression';
+import { marketplaceService } from '@/services/marketplace.service';
+import { useAuth } from '@/context/AuthContext';
 
 interface CreateListingProps {
   onBack: () => void;
@@ -11,10 +13,12 @@ interface CreateListingProps {
 }
 
 export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
+    quantity: '',
     unit: 'kg',
     category: 'Arabica',
     location: '',
@@ -22,6 +26,8 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = ['Arabica', 'Robusta', 'Gear', 'Equipment', 'Other'];
@@ -116,10 +122,64 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
-    onBack();
+    
+    if (!isAuthenticated) {
+      setError('Please log in to create a listing');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.title.trim()) {
+      setError('Title is required');
+      return;
+    }
+    if (!formData.description.trim()) {
+      setError('Description is required');
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      setError('Valid price is required');
+      return;
+    }
+    if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
+      setError('Valid quantity is required');
+      return;
+    }
+    if (!formData.location.trim()) {
+      setError('Location is required');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const listingData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price),
+        quantity: parseFloat(formData.quantity),
+        unit: formData.unit,
+        category: formData.category,
+        location: formData.location.trim(),
+        images: formData.images
+      };
+
+      const result = await marketplaceService.createListing(listingData);
+      
+      // Call optional onSubmit callback if provided
+      onSubmit?.(result);
+      
+      // Navigate back on success
+      onBack();
+    } catch (err: any) {
+      console.error('Failed to create listing:', err);
+      setError(err.message || 'Failed to create listing. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -293,17 +353,30 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
+                min="0"
+                step="0.01"
               />
 
               <Input
-                type="text"
-                label="Location"
-                placeholder="Kaski, Nepal"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                type="number"
+                label="Quantity"
+                placeholder="100"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                 required
+                min="0"
+                step="0.01"
               />
             </div>
+
+            <Input
+              type="text"
+              label="Location"
+              placeholder="Kaski, Nepal"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              required
+            />
 
             <div>
               <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
@@ -318,12 +391,18 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
               />
             </div>
 
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+
             <div className="flex gap-3">
-              <Button variant="outline" type="button" onClick={onBack} className="flex-1">
+              <Button variant="outline" type="button" onClick={onBack} className="flex-1" disabled={saving}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" className="flex-1">
-                Create Listing
+              <Button variant="primary" type="submit" className="flex-1" disabled={saving}>
+                {saving ? 'Creating...' : 'Create Listing'}
               </Button>
             </div>
           </form>
