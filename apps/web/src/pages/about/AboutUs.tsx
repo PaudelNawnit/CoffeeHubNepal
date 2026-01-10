@@ -17,16 +17,16 @@ import AdityaManShresthaImage from '@/assets/images/team/AdityaManShrestha.png';
 
 const TEAM_MEMBERS = [
   { name: "Suraj Nepal", role: "Backend Developer", image: surajNepalImage },
-  { name: "Sarthak Bhattarai", role: "Strategist", image: SarthakBhattaraiImage },
-  { name: "Siddhant Giri", role: "Front End Developer", image: SiddhantGiriImage },
+  { name: "Sarthak Bhattarai", role: "Social Media Manager", image: SarthakBhattaraiImage },
+  { name: "Siddhant Giri", role: "Frontend Developer", image: SiddhantGiriImage },
   { name: "Krrish Nyopane", role: "UI/UX Designer", image: KrrishNyopaneImage },
   { name: "Sachin Jha", role: "Graphic Designer", image: SachinJhaImage },
   { name: "Mukesh Pandey", role: "Graphic Designer", image: MukeshPandeyImage },
   { name: "Nawnit Paudel", role: "Security Expert", image: NawnitPoudelImage },
   { name: "Supriya Khadka", role: "App Developer", image: SupriyaKhadkaImage },
   { name: "Rajdip Joshi", role: "App Developer", image: RajdipJoshiImage },
-  { name: "Aastha Gaire", role: "Front End Developer", image: AasthaGaireImage },
-  { name: "Pradip Khanal", role: "Content Writer", image: PradipKhanalImage },
+  { name: "Aastha Gaire", role: "Frontend Developer", image: AasthaGaireImage },
+  { name: "Pradip Khanal", role: "Researcher", image: PradipKhanalImage },
   { name: "Aditya Man Shrestha", role: "Content Writer", image: AdityaManShresthaImage }
 
   
@@ -95,6 +95,7 @@ export const AboutUs = () => {
             <Coffee className="text-[#6F4E37]" size={28} />
             <h3 className="text-2xl font-black">What We Do</h3>
           </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>

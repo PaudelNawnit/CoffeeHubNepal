@@ -42,6 +42,7 @@ const Verifications = lazy(() => import('./pages/admin/Verifications').then(m =>
 const Reports = lazy(() => import('./pages/admin/Reports').then(m => ({ default: m.Reports })));
 const Users = lazy(() => import('./pages/admin/Users').then(m => ({ default: m.Users })));
 const Prices = lazy(() => import('./pages/admin/Prices').then(m => ({ default: m.Prices })));
+const Contacts = lazy(() => import('./pages/admin/Contacts').then(m => ({ default: m.Contacts })));
 const MyListings = lazy(() => import('./pages/profile/MyListings').then(m => ({ default: m.MyListings })));
 const MyJobs = lazy(() => import('./pages/jobs/MyJobs').then(m => ({ default: m.MyJobs })));
 const Certifications = lazy(() => import('./pages/profile/Certifications').then(m => ({ default: m.Certifications })));
@@ -199,6 +200,7 @@ const AppContent = () => {
         {subPage === 'reports' && <Reports />}
         {subPage === 'users' && <Users />}
         {subPage === 'prices' && <Prices />}
+        {subPage === 'contacts' && <Contacts />}
         {!subPage && <Dashboard />}
       </Suspense>
     );

@@ -1,30 +1,47 @@
-import { ArrowLeft, Mail, Phone, MapPin, Send, MessageCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Send, MessageCircle, Clock, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
+import { contactService } from '@/services/contact.service';
 
 export const ContactUs = () => {
   const { setCurrentPage } = useApp();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
     subject: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate form submission
-    setTimeout(() => {
+    setError(null);
+    
+    try {
+      await contactService.submitContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        subject: formData.subject,
+        message: formData.message
+      });
+      
+      setSubmitSuccess(true);
+      setFormData({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', subject: '', message: '' });
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      alert('Thank you for contacting us! We will get back to you soon.');
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    }, 1000);
+    }
   };
 
   return (
@@ -100,6 +117,21 @@ export const ContactUs = () => {
             <h3 className="text-2xl font-black">Send us a Message</h3>
           </div>
 
+          {submitSuccess ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="text-green-600" size={32} />
+              </div>
+              <h4 className="text-xl font-black text-green-700 mb-2">Message Sent!</h4>
+              <p className="text-gray-600 mb-6">Thank you for contacting us. We will get back to you soon.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => setSubmitSuccess(false)}
+              >
+                Send Another Message
+              </Button>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <Input
@@ -151,6 +183,12 @@ export const ContactUs = () => {
               />
             </div>
 
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
             <Button 
               type="submit" 
               variant="primary" 
@@ -166,6 +204,7 @@ export const ContactUs = () => {
               )}
             </Button>
           </form>
+          )}
         </Card>
 
         {/* Social Media / Quick Links */}

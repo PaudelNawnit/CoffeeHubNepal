@@ -11,6 +11,7 @@ import adminRoutes from './routes/admin.js';
 import jobRoutes from './routes/jobs.js';
 import productRoutes from './routes/products.js';
 import priceRoutes from './routes/prices.js';
+import contactRoutes from './routes/contacts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -86,6 +87,7 @@ export const createApp = () => {
   app.use('/jobs', jobRoutes);
   app.use('/products', productRoutes);
   app.use('/prices', priceRoutes);
+  app.use('/contacts', contactRoutes);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

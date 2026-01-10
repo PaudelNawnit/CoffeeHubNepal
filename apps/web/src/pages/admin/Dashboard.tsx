@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Users, ShieldCheck, AlertTriangle, UserCheck, ArrowLeft, DollarSign } from 'lucide-react';
+import { Users, ShieldCheck, AlertTriangle, UserCheck, ArrowLeft, DollarSign, MessageCircle } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { adminService } from '@/services/admin.service';
+import { contactService } from '@/services/contact.service';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,7 +27,8 @@ export const Dashboard = () => {
     totalUsers: 0,
     verifiedUsers: 0,
     pendingVerifications: 0,
-    pendingReports: 0
+    pendingReports: 0,
+    openContacts: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -36,14 +38,18 @@ export const Dashboard = () => {
 
   const loadStats = async () => {
     try {
-      const adminStats = await adminService.getAdminStats();
-      const reportsResult = await adminService.getReports({ status: 'pending', limit: 1 });
+      const [adminStats, reportsResult, contactStats] = await Promise.all([
+        adminService.getAdminStats(),
+        adminService.getReports({ status: 'pending', limit: 1 }),
+        contactService.getContactStats().catch(() => ({ open: 0 }))
+      ]);
       
       setStats({
         totalUsers: adminStats.totalUsers,
         verifiedUsers: adminStats.verifiedUsers,
         pendingVerifications: adminStats.pendingVerifications,
-        pendingReports: reportsResult.pagination?.total || 0
+        pendingReports: reportsResult.pagination?.total || 0,
+        openContacts: contactStats.open
       });
     } catch (error) {
       console.error('Failed to load stats:', error);
@@ -136,6 +142,22 @@ export const Dashboard = () => {
         >
           <DollarSign size={32} className="text-[#6F4E37]" />
           <span className="font-black text-sm">Manage Prices</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="p-6 flex flex-col items-center gap-2 hover:bg-[#F8F5F2] transition-colors relative" 
+          onClick={() => {
+            setCurrentPage('admin');
+            setSubPage('contacts');
+          }}
+        >
+          <MessageCircle size={32} className="text-[#6F4E37]" />
+          <span className="font-black text-sm">Contact Messages</span>
+          {stats.openContacts > 0 && (
+            <span className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {stats.openContacts}
+            </span>
+          )}
         </Button>
       </div>
 
