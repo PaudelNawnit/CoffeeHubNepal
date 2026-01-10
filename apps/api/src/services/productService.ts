@@ -96,7 +96,7 @@ export const getProducts = async (filters?: {
 
   const [products, total] = await Promise.all([
     Product.find(query)
-      .select('title description price unit quantity location category images sellerName sellerEmail verified active sold createdAt updatedAt _id')
+      .select('title description price unit quantity location category images sellerName sellerEmail sellerId verified active sold createdAt updatedAt _id')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -104,11 +104,24 @@ export const getProducts = async (filters?: {
     Product.countDocuments(query)
   ]);
 
-  // Add _id as id for frontend compatibility
+  // Get seller phone numbers from User model
+  const { User } = await import('../models/User.js');
+  const sellerIds = products.map((p: any) => p.sellerId).filter(Boolean);
+  const sellers = await User.find({ _id: { $in: sellerIds } })
+    .select('_id phone')
+    .lean();
+  
+  const sellerPhoneMap = new Map(
+    sellers.map((s: any) => [s._id.toString(), s.phone || null])
+  );
+
+  // Add _id as id for frontend compatibility and include phone number
   const productsWithId = products.map((product: any) => ({
     ...product,
     id: product._id.toString(),
-    _id: product._id.toString()
+    _id: product._id.toString(),
+    sellerId: product.sellerId?.toString(),
+    sellerPhone: sellerPhoneMap.get(product.sellerId?.toString()) || null
   }));
 
   return {
@@ -123,9 +136,27 @@ export const getProducts = async (filters?: {
 };
 
 export const getProductById = async (id: string): Promise<any> => {
-  return await Product.findById(id)
+  const product = await Product.findById(id)
     .select('title description price unit quantity location category images sellerId sellerName sellerEmail verified active sold createdAt updatedAt')
     .lean();
+  
+  if (!product) {
+    return null;
+  }
+
+  // Get seller phone number from User model
+  const { User } = await import('../models/User.js');
+  const seller = await User.findById(product.sellerId)
+    .select('phone')
+    .lean();
+  
+  return {
+    ...product,
+    _id: product._id.toString(),
+    id: product._id.toString(),
+    sellerId: product.sellerId?.toString(),
+    sellerPhone: seller?.phone || null
+  };
 };
 
 export const updateProduct = async (id: string, userId: string, data: Partial<CreateProductData>): Promise<any> => {

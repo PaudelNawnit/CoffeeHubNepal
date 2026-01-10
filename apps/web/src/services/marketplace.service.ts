@@ -24,6 +24,7 @@ export interface Listing {
   images: string[];
   createdAt: string;
   sellerId?: string;
+  sellerPhone?: string | null;
   active?: boolean;
   sold?: boolean;
 }

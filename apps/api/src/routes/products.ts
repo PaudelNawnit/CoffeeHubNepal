@@ -53,7 +53,11 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'PRODUCT_NOT_FOUND' });
     }
     
-    return res.json(product);
+    // Ensure sellerPhone is included
+    return res.json({
+      ...product,
+      sellerPhone: product.sellerPhone || null
+    });
   } catch (error) {
     console.error('Get product error:', error);
     return res.status(500).json({ error: 'FAILED_TO_FETCH_PRODUCT' });
@@ -85,13 +89,17 @@ router.post('/', authenticate, validate(createProductSchema), async (req: AuthRe
     
     console.log('[Products] Product created successfully:', product._id);
     
+    // Get seller phone number from User model
+    const seller = await User.findById(req.userId).select('phone').lean();
+    
     // Convert to plain object with string IDs
     const productObj = product.toObject();
     return res.status(201).json({
       ...productObj,
       _id: productObj._id.toString(),
       id: productObj._id.toString(),
-      sellerId: productObj.sellerId.toString()
+      sellerId: productObj.sellerId.toString(),
+      sellerPhone: seller?.phone || null
     });
   } catch (error: any) {
     console.error('[Products] Create product error:', error);

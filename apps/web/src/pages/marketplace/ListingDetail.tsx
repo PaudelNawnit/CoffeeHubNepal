@@ -20,6 +20,7 @@ interface Listing {
   description?: string;
   quantity?: number;
   sellerId?: string;
+  sellerPhone?: string | null;
   sold?: boolean;
 }
 
@@ -87,18 +88,33 @@ export const ListingDetail = ({ listing, onClose }: ListingDetailProps) => {
 
         <p className="text-gray-600 text-sm leading-relaxed mb-10">{description}</p>
 
-        {!listing.sold && (
+        {!listing.sold && listing.sellerPhone && (
           <div className="flex gap-4">
             <Button 
               variant="secondary" 
               className="flex-1 py-4 text-base" 
-              onClick={() => window.location.href = `tel:+9779800000000`}
+              onClick={() => {
+                const phoneNumber = listing.sellerPhone?.replace(/\D/g, ''); // Remove non-digits
+                const formattedPhone = phoneNumber?.startsWith('977') 
+                  ? `+${phoneNumber}` 
+                  : phoneNumber?.startsWith('9') 
+                    ? `+977${phoneNumber}` 
+                    : `+977${phoneNumber}`;
+                window.location.href = `tel:${formattedPhone}`;
+              }}
             >
               <Phone size={20}/> Call Seller
             </Button>
             <Button variant="primary" className="flex-1 py-4 text-base">
               Negotiate
             </Button>
+          </div>
+        )}
+        {!listing.sold && !listing.sellerPhone && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <p className="text-yellow-800 text-sm text-center">
+              Contact information not available. Please contact the seller through other means.
+            </p>
           </div>
         )}
       </div>

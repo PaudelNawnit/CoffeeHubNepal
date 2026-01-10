@@ -15,7 +15,7 @@ export const Marketplace = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { language, navigate } = useApp();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     loadListings();
@@ -30,6 +30,7 @@ export const Marketplace = () => {
         limit: 100 // Get all active listings
       });
       // The API already filters by active and sold, but we can add extra safety
+      // Sellers can see their own products too, so we don't filter by sellerId
       const activeListings = response.products.filter(
         (product) => product.sold !== true && product.active !== false
       );
