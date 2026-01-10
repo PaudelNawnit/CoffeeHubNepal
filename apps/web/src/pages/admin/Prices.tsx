@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, TrendingUp, TrendingDown, Minus, Save, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Plus, Edit, Trash2, TrendingUp, TrendingDown, Minus, Save, X, Upload } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { priceService, Price } from '@/services/price.service';
@@ -21,6 +21,10 @@ export const Prices = () => {
   const [newPrice, setNewPrice] = useState<number>(0);
   const [newImage, setNewImage] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [isDraggingNew, setIsDraggingNew] = useState(false);
+  const [isDraggingEdit, setIsDraggingEdit] = useState<string | null>(null);
+  const newImageInputRef = useRef<HTMLInputElement>(null);
+  const editImageInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   // Redirect if not authenticated or not admin/moderator
   useEffect(() => {
@@ -65,6 +69,11 @@ export const Prices = () => {
       return;
     }
 
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -74,6 +83,42 @@ export const Prices = () => {
       setError('Failed to read image file');
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, setImage: (img: string) => void) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file, setImage);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent, isEdit: boolean = false, priceId?: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isEdit && priceId) {
+      setIsDraggingEdit(priceId);
+    } else {
+      setIsDraggingNew(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingNew(false);
+    setIsDraggingEdit(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, setImage: (img: string) => void, isEdit: boolean = false, priceId?: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingNew(false);
+    setIsDraggingEdit(null);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleImageUpload(file, setImage);
+    }
   };
 
   const handleSave = async (priceId: string) => {
@@ -245,18 +290,45 @@ export const Prices = () => {
                     </button>
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload(file, setNewImage);
-                    }
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-[#6F4E37] text-sm"
-                />
-                <p className="text-xs text-gray-500 mt-1">Max 2MB. JPG, PNG, or WebP</p>
+                <div
+                  className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                    isDraggingNew
+                      ? 'border-[#6F4E37] bg-[#6F4E37]/5'
+                      : 'border-gray-300 bg-gray-50 hover:border-[#6F4E37]/50'
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, false)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, setNewImage, false)}
+                >
+                  <input
+                    ref={newImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e, setNewImage)}
+                    className="hidden"
+                  />
+                  {isDraggingNew ? (
+                    <div className="text-[#6F4E37]">
+                      <Upload size={24} className="mx-auto mb-2" />
+                      <p className="text-sm font-bold">Drop image here</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={20} className="mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        Drag and drop an image here, or{' '}
+                        <button
+                          type="button"
+                          onClick={() => newImageInputRef.current?.click()}
+                          className="text-[#6F4E37] font-bold hover:underline"
+                        >
+                          browse
+                        </button>
+                      </p>
+                      <p className="text-xs text-gray-500">Max 2MB. JPG, PNG, or WebP</p>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -369,17 +441,47 @@ export const Prices = () => {
                                 </button>
                               </div>
                             )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  handleImageUpload(file, setEditImage);
-                                }
-                              }}
-                              className="w-full text-xs px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:border-[#6F4E37]"
-                            />
+                            <div
+                              className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                                isDraggingEdit === priceId
+                                  ? 'border-[#6F4E37] bg-[#6F4E37]/5'
+                                  : 'border-gray-300 bg-gray-50 hover:border-[#6F4E37]/50'
+                              }`}
+                              onDragOver={(e) => handleDragOver(e, true, priceId)}
+                              onDragLeave={handleDragLeave}
+                              onDrop={(e) => handleDrop(e, setEditImage, true, priceId)}
+                            >
+                              <input
+                                ref={(el) => {
+                                  if (el) editImageInputRefs.current[priceId] = el;
+                                }}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileSelect(e, setEditImage)}
+                                className="hidden"
+                              />
+                              {isDraggingEdit === priceId ? (
+                                <div className="text-[#6F4E37]">
+                                  <Upload size={16} className="mx-auto mb-1" />
+                                  <p className="text-xs font-bold">Drop image here</p>
+                                </div>
+                              ) : (
+                                <>
+                                  <Upload size={14} className="mx-auto mb-1 text-gray-400" />
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    Drag & drop or{' '}
+                                    <button
+                                      type="button"
+                                      onClick={() => editImageInputRefs.current[priceId]?.click()}
+                                      className="text-[#6F4E37] font-bold hover:underline"
+                                    >
+                                      browse
+                                    </button>
+                                  </p>
+                                  <p className="text-[10px] text-gray-500">Max 2MB</p>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ) : (

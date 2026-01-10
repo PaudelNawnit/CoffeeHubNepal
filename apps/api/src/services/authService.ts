@@ -18,7 +18,7 @@ export const comparePassword = async (password: string, hash: string) =>
 
 const tokenForUser = (user: UserDocument) =>
   jwt.sign({ 
-    sub: user.id, 
+    sub: user._id.toString(), 
     email: user.email,
     role: user.role || 'farmer'
   }, env.jwtSecret, { expiresIn: '2h' });
@@ -163,12 +163,12 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
     return;
   }
   
-  console.log(`[Auth Service] ✓ User found: ${user.email} (ID: ${user.id})`);
+  console.log(`[Auth Service] ✓ User found: ${user.email} (ID: ${user._id.toString()})`);
 
   // Generate reset token (JWT with 1 hour expiry)
   const resetToken = jwt.sign(
     { 
-      sub: user.id,
+      sub: user._id.toString(),
       email: user.email,
       type: 'password-reset'
     },

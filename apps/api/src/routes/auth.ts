@@ -221,6 +221,18 @@ router.put(
       }
 
       const { name, phone, location, avatar } = req.body;
+      
+      // Validate avatar size if provided (base64 strings are ~33% larger than original)
+      if (avatar !== undefined && avatar !== null && avatar !== '') {
+        // Base64 string length check (2MB image = ~2.67MB base64)
+        if (avatar.length > 3000000) { // ~2.2MB base64 (roughly 1.65MB image)
+          return res.status(400).json({ 
+            error: 'AVATAR_TOO_LARGE', 
+            message: 'Image is too large. Please use an image smaller than 2MB.' 
+          });
+        }
+      }
+      
       const user = await User.findById(userId);
       
       if (!user) {
@@ -248,7 +260,7 @@ router.put(
         user.location = location;
       }
       if (avatar !== undefined) {
-        user.avatar = avatar;
+        user.avatar = avatar || null; // Allow empty string to remove avatar
       }
 
       await user.save();
@@ -265,11 +277,33 @@ router.put(
           verified: user.verified
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update profile error:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
+      
+      // Handle validation errors
+      if (error?.name === 'ValidationError') {
+        return res.status(400).json({ 
+          error: 'VALIDATION_ERROR',
+          message: error.message || 'Invalid data provided'
+        });
+      }
+      
+      // Handle MongoDB errors
+      if (error?.name === 'MongoError' || error?.code === 11000) {
+        return res.status(400).json({ 
+          error: 'DATABASE_ERROR',
+          message: 'Database error occurred. Please try again.'
+        });
+      }
+      
       return res.status(500).json({ 
         error: 'UPDATE_PROFILE_FAILED',
-        message: 'Failed to update profile. Please try again.' 
+        message: error?.message || 'Failed to update profile. Please try again.' 
       });
     }
   }
