@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { ListingCard } from '@/components/cards/ListingCard';
 import { ListingDetail } from './ListingDetail';
 import { marketplaceService, Listing } from '@/services/marketplace.service';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { t } from '@/i18n';
 
 export const Marketplace = () => {
@@ -13,7 +14,8 @@ export const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { language } = useApp();
+  const { language, navigate } = useApp();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadListings();
@@ -53,9 +55,21 @@ export const Marketplace = () => {
             <h2 className="text-3xl font-black">{t(language, 'marketplace.title')}</h2>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t(language, 'marketplace.subtitle')}</p>
           </div>
-          <Button variant="outline" className="p-2 rounded-xl">
-            <Filter size={18}/>
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAuthenticated && (
+              <Button 
+                variant="primary" 
+                className="px-4 py-2 rounded-xl flex items-center gap-2"
+                onClick={() => navigate('create-listing')}
+              >
+                <Plus size={18}/>
+                <span className="hidden sm:inline">Add Product</span>
+              </Button>
+            )}
+            <Button variant="outline" className="p-2 rounded-xl">
+              <Filter size={18}/>
+            </Button>
+          </div>
         </div>
 
         <div className="relative">
@@ -80,7 +94,17 @@ export const Marketplace = () => {
           </div>
         ) : listings.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">{searchQuery ? 'No products found matching your search.' : 'No products available at the moment.'}</p>
+            <p className="text-gray-500 mb-4">{searchQuery ? 'No products found matching your search.' : 'No products available at the moment.'}</p>
+            {isAuthenticated && !searchQuery && (
+              <Button 
+                variant="primary" 
+                onClick={() => navigate('create-listing')}
+                className="inline-flex items-center gap-2"
+              >
+                <Plus size={18}/>
+                Add Your First Product
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
