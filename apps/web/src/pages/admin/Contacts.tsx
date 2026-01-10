@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Mail, Phone, MessageCircle, CheckCircle, Clock, XCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MessageCircle, CheckCircle, Clock, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
