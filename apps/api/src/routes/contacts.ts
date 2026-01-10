@@ -19,9 +19,9 @@ const router = Router();
 const createContactSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
+  phone: z.string().optional().nullable(),
   subject: z.string().min(1, 'Subject is required').max(200),
-  message: z.string().min(10, 'Message must be at least 10 characters').max(5000)
+  message: z.string().min(5, 'Message must be at least 5 characters').max(5000)
 });
 
 // Schema for updating a contact

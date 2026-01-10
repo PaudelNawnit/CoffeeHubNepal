@@ -3,7 +3,7 @@ import { Contact, ContactDocument, ContactStatus } from '../models/Contact.js';
 export interface CreateContactData {
   name: string;
   email: string;
-  phone?: string;
+  phone?: string | null;
   subject: string;
   message: string;
 }
@@ -26,7 +26,11 @@ export interface UpdateContactData {
  */
 export const createContact = async (data: CreateContactData): Promise<ContactDocument> => {
   const contact = new Contact({
-    ...data,
+    name: data.name,
+    email: data.email,
+    phone: data.phone || undefined, // Convert empty string/null to undefined
+    subject: data.subject,
+    message: data.message,
     status: 'open'
   });
   
