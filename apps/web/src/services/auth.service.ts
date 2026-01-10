@@ -116,16 +116,29 @@ export const authService = {
     }
   },
 
-  async register(data: RegisterData) {
+  async register(data: RegisterData, captchaToken?: string) {
     try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add CAPTCHA token to headers if provided, or send 'captcha-disabled' if not
+      if (captchaToken) {
+        headers['x-captcha-token'] = captchaToken;
+      } else {
+        headers['x-captcha-token'] = 'captcha-disabled';
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           email: data.email,
           password: data.password,
+          name: data.name,
+          phone: data.phone,
+          location: data.location,
+          role: data.role,
         }),
       });
 
@@ -141,6 +154,15 @@ export const authService = {
         }
         if (error.code === 'VALIDATION_ERROR') {
           throw new Error('Please check your information and try again. Make sure your email is valid and password meets the requirements.');
+        }
+        if (error.code === 'CAPTCHA_REQUIRED') {
+          throw new Error('CAPTCHA verification is required. Please complete the CAPTCHA.');
+        }
+        if (error.code === 'CAPTCHA_INVALID' || error.code === 'CAPTCHA_VERIFICATION_FAILED') {
+          throw new Error('CAPTCHA verification failed. Please try again.');
+        }
+        if (error.code === 'ACCOUNT_RATE_LIMITED') {
+          throw new Error('Too many registration attempts. Please wait a moment and try again.');
         }
         throw new Error(error.error || 'Registration failed. Please try again.');
       }
