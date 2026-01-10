@@ -94,6 +94,10 @@ const AppContent = () => {
   };
 
   const handleBack = () => {
+    // If we're on create-listing, ensure we return to marketplace
+    if (subPage === 'create-listing') {
+      setCurrentPage('market');
+    }
     setSubPage(null);
     setSelectedId(null);
   };
