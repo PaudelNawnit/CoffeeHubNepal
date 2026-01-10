@@ -34,16 +34,23 @@ const updateContactSchema = z.object({
 // Create a new contact submission (public)
 router.post('/', validate(createContactSchema), async (req, res) => {
   try {
+    console.log('[Contact Route] Creating contact with data:', JSON.stringify(req.body, null, 2));
     const contact = await createContact(req.body);
+    console.log('[Contact Route] Contact created successfully:', contact._id);
     return res.status(201).json({
       message: 'Your message has been sent successfully. We will get back to you soon.',
       id: contact._id.toString()
     });
   } catch (error: any) {
-    console.error('Create contact error:', error);
+    console.error('[Contact Route] Create contact error:', error);
+    console.error('[Contact Route] Error name:', error.name);
+    console.error('[Contact Route] Error message:', error.message);
+    if (error.code) {
+      console.error('[Contact Route] Error code:', error.code);
+    }
     return res.status(500).json({ 
       error: 'FAILED_TO_CREATE_CONTACT', 
-      message: 'Failed to send message. Please try again.' 
+      message: error.message || 'Failed to send message. Please try again.' 
     });
   }
 });

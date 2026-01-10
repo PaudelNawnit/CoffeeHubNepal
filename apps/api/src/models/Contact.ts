@@ -37,10 +37,10 @@ const contactSchema = new Schema<ContactDocument>(
   { timestamps: true }
 );
 
-// Indexes for efficient querying
-contactSchema.index({ status: 1, createdAt: -1 });
-contactSchema.index({ email: 1 });
-contactSchema.index({ createdAt: -1 });
+// Note: Indexes are managed in Azure Cosmos DB portal, not in code
+// contactSchema.index({ status: 1, createdAt: -1 });
+// contactSchema.index({ email: 1 });
+// contactSchema.index({ createdAt: -1 });
 
 export const Contact = mongoose.model<ContactDocument>('Contact', contactSchema);
 
