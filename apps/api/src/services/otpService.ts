@@ -19,58 +19,78 @@ const generateOTP = (): string => {
  * Send OTP for email verification during signup
  */
 export const sendSignupOTP = async (email: string): Promise<{ success: boolean; message: string; expiresIn: number }> => {
-  const normalizedEmail = email.toLowerCase().trim();
-  
-  // Check if email is already registered
-  const existingUser = await User.findOne({ email: normalizedEmail });
-  if (existingUser) {
-    throw new Error('EMAIL_IN_USE');
-  }
-
-  // Check for recent OTP (prevent spam)
-  const recentOTP = await OTP.findOne({
-    email: normalizedEmail,
-    purpose: 'signup',
-    createdAt: { $gt: new Date(Date.now() - RESEND_COOLDOWN_SECONDS * 1000) }
-  });
-
-  if (recentOTP) {
-    const waitTime = Math.ceil((recentOTP.createdAt.getTime() + RESEND_COOLDOWN_SECONDS * 1000 - Date.now()) / 1000);
-    throw new Error(`WAIT_${waitTime}_SECONDS`);
-  }
-
-  // Delete any existing OTPs for this email
-  await OTP.deleteMany({ email: normalizedEmail, purpose: 'signup' });
-
-  // Generate new OTP
-  const otp = generateOTP();
-  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-
-  // Save OTP to database
-  await OTP.create({
-    email: normalizedEmail,
-    otp,
-    purpose: 'signup',
-    expiresAt,
-    attempts: 0,
-    verified: false
-  });
-
-  // Send OTP via email
   try {
-    await sendOTPEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
-    console.log(`[OTP Service] Signup OTP sent to ${normalizedEmail}`);
-  } catch (error) {
-    // Delete the OTP if email sending fails
-    await OTP.deleteOne({ email: normalizedEmail, purpose: 'signup', otp });
-    throw new Error('FAILED_TO_SEND_OTP');
-  }
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check if email is already registered
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      throw new Error('EMAIL_IN_USE');
+    }
 
-  return {
-    success: true,
-    message: 'OTP sent successfully',
-    expiresIn: OTP_EXPIRY_MINUTES * 60
-  };
+    // Check for recent OTP (prevent spam)
+    const recentOTP = await OTP.findOne({
+      email: normalizedEmail,
+      purpose: 'signup',
+      createdAt: { $gt: new Date(Date.now() - RESEND_COOLDOWN_SECONDS * 1000) }
+    });
+
+    if (recentOTP) {
+      const waitTime = Math.ceil((recentOTP.createdAt.getTime() + RESEND_COOLDOWN_SECONDS * 1000 - Date.now()) / 1000);
+      throw new Error(`WAIT_${waitTime}_SECONDS`);
+    }
+
+    // Delete any existing OTPs for this email
+    await OTP.deleteMany({ email: normalizedEmail, purpose: 'signup' });
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    // Save OTP to database
+    try {
+      await OTP.create({
+        email: normalizedEmail,
+        otp,
+        purpose: 'signup',
+        expiresAt,
+        attempts: 0,
+        verified: false
+      });
+      console.log(`[OTP Service] OTP created for ${normalizedEmail}`);
+    } catch (dbError: any) {
+      console.error('[OTP Service] Database error creating OTP:', dbError);
+      throw new Error('FAILED_TO_CREATE_OTP');
+    }
+
+    // Send OTP via email
+    try {
+      await sendOTPEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
+      console.log(`[OTP Service] Signup OTP sent to ${normalizedEmail}`);
+    } catch (error) {
+      console.error('[OTP Service] Email sending error:', error);
+      // Delete the OTP if email sending fails
+      await OTP.deleteOne({ email: normalizedEmail, purpose: 'signup', otp });
+      throw new Error('FAILED_TO_SEND_OTP');
+    }
+
+    return {
+      success: true,
+      message: 'OTP sent successfully',
+      expiresIn: OTP_EXPIRY_MINUTES * 60
+    };
+  } catch (error: any) {
+    // Re-throw known errors
+    if (error.message === 'EMAIL_IN_USE' || 
+        error.message.startsWith('WAIT_') || 
+        error.message === 'FAILED_TO_SEND_OTP' ||
+        error.message === 'FAILED_TO_CREATE_OTP') {
+      throw error;
+    }
+    // Wrap unknown errors
+    console.error('[OTP Service] Unexpected error in sendSignupOTP:', error);
+    throw new Error(error.message || 'FAILED_TO_SEND_OTP');
+  }
 };
 
 /**

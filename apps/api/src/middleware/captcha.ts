@@ -16,6 +16,11 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
     return res.status(400).json({ error: 'CAPTCHA_REQUIRED', code: 'CAPTCHA_REQUIRED' });
   }
 
+  // Allow 'captcha-disabled' token (for development or when CAPTCHA is optional)
+  if (token === 'captcha-disabled') {
+    return next();
+  }
+
   try {
     // Verify token with Google reCAPTCHA
     const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
@@ -35,6 +40,15 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       body: params.toString(),
     });
 
+    if (!response.ok) {
+      console.error('CAPTCHA verification request failed:', response.status, response.statusText);
+      return res.status(500).json({
+        error: 'CAPTCHA_VERIFICATION_FAILED',
+        code: 'CAPTCHA_VERIFICATION_FAILED',
+        message: 'Failed to verify CAPTCHA. Please try again.'
+      });
+    }
+
     const data: any = await response.json();
 
     if (!data.success) {
@@ -42,6 +56,7 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       return res.status(400).json({
         error: 'CAPTCHA_INVALID',
         code: 'CAPTCHA_INVALID',
+        message: 'CAPTCHA verification failed. Please try again.'
       });
     }
 
@@ -52,6 +67,7 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
     return res.status(500).json({
       error: 'CAPTCHA_VERIFICATION_FAILED',
       code: 'CAPTCHA_VERIFICATION_FAILED',
+      message: 'Failed to verify CAPTCHA. Please try again.'
     });
   }
 };

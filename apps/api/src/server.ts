@@ -1,6 +1,8 @@
 import { createApp } from './app.js';
 import { connectDb } from './config/db.js';
 import { env } from './config/env.js';
+// Import models to ensure they're registered
+import './models/OTP.js';
 
 const start = async () => {
   await connectDb();

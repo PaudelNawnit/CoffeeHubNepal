@@ -58,10 +58,16 @@ router.post(
   async (req, res) => {
     const { email } = req.body;
     try {
+      console.log('[Auth Route] Sending OTP to:', email);
       const result = await sendSignupOTP(email);
+      console.log('[Auth Route] OTP sent successfully');
       return res.json(result);
     } catch (error) {
       const err = (error as Error).message;
+      console.error('[Auth Route] Send OTP error:', error);
+      console.error('[Auth Route] Error message:', err);
+      console.error('[Auth Route] Error stack:', (error as Error).stack);
+      
       if (err === 'EMAIL_IN_USE') {
         return res.status(409).json({ 
           error: 'EMAIL_IN_USE', 
@@ -85,8 +91,11 @@ router.post(
           message: 'Failed to send verification code. Please try again.'
         });
       }
-      console.error('Send OTP error:', error);
-      return res.status(500).json({ error: 'SEND_OTP_FAILED' });
+      return res.status(500).json({ 
+        error: 'SEND_OTP_FAILED',
+        code: 'SEND_OTP_FAILED',
+        message: err || 'Failed to send verification code. Please try again.'
+      });
     }
   }
 );
