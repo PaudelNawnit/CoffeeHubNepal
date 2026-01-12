@@ -20,7 +20,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials, captchaToken?: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData, captchaToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -80,10 +80,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterData, captchaToken?: string) => {
     try {
       setIsLoading(true);
-      const response: any = await authService.register(data);
+      const response: any = await authService.register(data, captchaToken);
       
       if (response.token && response.user) {
         // User is already stored in localStorage by authService

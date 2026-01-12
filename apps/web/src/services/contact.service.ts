@@ -49,10 +49,21 @@ export const contactService = {
     phone?: string;
     subject: string;
     message: string;
-  }): Promise<{ message: string; id: string }> {
+  }, captchaToken?: string): Promise<{ message: string; id: string }> {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add CAPTCHA token to headers if provided
+    if (captchaToken) {
+      headers['x-captcha-token'] = captchaToken;
+    } else {
+      headers['x-captcha-token'] = 'captcha-disabled';
+    }
+
     const response = await fetch(`${API_BASE_URL}/contacts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(data)
     });
 

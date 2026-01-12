@@ -4,6 +4,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { LoadingOverlay } from '@/components/common/LoadingOverlay';
+import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import logoImage from '@/assets/images/logo/coffeelogo.png';
@@ -42,6 +43,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -80,6 +82,10 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       newErrors.acceptTerms = 'You must accept the terms and conditions';
     }
 
+    if (!captchaToken) {
+      newErrors.captcha = 'Please complete the CAPTCHA verification';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -114,7 +120,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
         location: formData.location,
         password: formData.password,
         role: formData.role
-      });
+      }, captchaToken || undefined);
       
       // Show success message
       setSuccess(true);
@@ -416,6 +422,27 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   )}
                 </div>
               </label>
+            </div>
+
+            {/* CAPTCHA */}
+            <div className="space-y-2">
+              <Captcha
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                  if (errors.captcha) setErrors({ ...errors, captcha: '' });
+                }}
+                onError={() => {
+                  setCaptchaToken(null);
+                  setErrors({ ...errors, captcha: 'CAPTCHA verification failed. Please try again.' });
+                }}
+                onExpire={() => {
+                  setCaptchaToken(null);
+                  setErrors({ ...errors, captcha: 'CAPTCHA expired. Please verify again.' });
+                }}
+              />
+              {errors.captcha && (
+                <p className="text-xs text-red-600 font-bold text-center">{errors.captcha}</p>
+              )}
             </div>
 
             <Button 

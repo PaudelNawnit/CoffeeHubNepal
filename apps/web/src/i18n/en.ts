@@ -118,6 +118,162 @@ export const en = {
     createAccount: 'Create Account',
     creatingAccount: 'Creating account...',
   },
+  about: {
+    title: 'About Us',
+    tagline: 'Empowering Nepal\'s coffee community through technology, knowledge sharing, and trusted connections.',
+    missionTitle: 'Our Mission',
+    missionText: 'To create a unified platform that connects coffee farmers, roasters, traders, and enthusiasts across Nepal, fostering knowledge exchange, fair trade, and sustainable growth in the coffee industry.',
+    visionTitle: 'Our Vision',
+    visionText: 'To become Nepal\'s leading digital ecosystem for coffee, where every farmer has access to markets, knowledge, and opportunities to thrive in the global coffee industry.',
+    whatWeDoTitle: 'What We Do',
+    whatWeDo1: 'Connect farmers with buyers and exporters',
+    whatWeDo2: 'Provide real-time market prices and trends',
+    whatWeDo3: 'Facilitate knowledge sharing through blog posts and community discussions',
+    whatWeDo4: 'Verify farmers to build trust in the community',
+    whatWeDo5: 'Share government notices and opportunities',
+    whatWeDo6: 'Create job opportunities in the coffee sector',
+    teamTitle: 'Our Team',
+    valuesTitle: 'Our Values',
+    transparencyTitle: 'Transparency',
+    transparencyText: 'Open and honest communication in all our dealings',
+    communityFirstTitle: 'Community First',
+    communityFirstText: 'Putting the needs of our coffee community at the center',
+    innovationTitle: 'Innovation',
+    innovationText: 'Using technology to solve real-world problems',
+  },
+  faq: {
+    title: 'Frequently Asked Questions',
+    headerTitle: 'How can we help you?',
+    headerSubtitle: 'Find answers to common questions about CoffeeHubNepal',
+    stillHaveQuestions: 'Still have questions?',
+    stillHaveQuestionsText: 'Can\'t find the answer you\'re looking for? Please reach out to our friendly support team.',
+    contactSupport: 'Contact Support',
+    categories: {
+      gettingStarted: 'Getting Started',
+      marketplace: 'Marketplace',
+      priceBoard: 'Price Board & Analytics',
+      community: 'Community & Q&A',
+      jobs: 'Jobs & Opportunities',
+      account: 'Account & Settings',
+    },
+    questions: {
+      createAccount: {
+        q: 'How do I create an account?',
+        a: 'Click on the Register button in the app, fill in your details including name, email, phone number, and location. You\'ll receive a verification email to activate your account.'
+      },
+      verifyFarmer: {
+        q: 'How do I verify as a farmer?',
+        a: 'Go to Profile → Farmer Verification and submit your documents including land ownership certificate, national ID, and photos of your coffee farm. Our team will review and verify within 3-5 business days.'
+      },
+      isFree: {
+        q: 'Is the platform free to use?',
+        a: 'Yes! CoffeeHubNepal is completely free for farmers. There are no subscription fees or hidden charges. We only charge a small commission on successful marketplace transactions.'
+      },
+      listCoffee: {
+        q: 'How do I list my coffee for sale?',
+        a: 'Click the "+" button in the bottom navigation, select "Sell Harvest", fill in the details including variety, quantity, price, and upload photos. Your listing will be visible to buyers immediately.'
+      },
+      payments: {
+        q: 'How are payments processed?',
+        a: 'Currently, payments are handled directly between buyer and seller. We recommend using secure payment methods and meeting in person for verification. We\'re working on integrated payment solutions.'
+      },
+      editListing: {
+        q: 'Can I edit or delete my listing?',
+        a: 'Yes! Go to Profile → My Listings, find your listing, and click Edit or Delete. You can update prices, quantities, or remove listings that are no longer available.'
+      },
+      dispute: {
+        q: 'What if I have a dispute with a buyer?',
+        a: 'Contact our support team immediately. We have a dispute resolution process and can mediate between parties. Always document your transactions and communications.'
+      },
+      pricesDetermined: {
+        q: 'How are prices determined?',
+        a: 'Prices are based on real-time market data from various cooperatives, exporters, and trading platforms across Nepal. We aggregate this data to provide accurate market rates.'
+      },
+      pricesUpdated: {
+        q: 'How often are prices updated?',
+        a: 'Prices are updated daily during market hours. Historical data and trends are available in the Analytics section to help you make informed decisions.'
+      },
+      priceTrends: {
+        q: 'Can I see price trends?',
+        a: 'Yes! The Price Board shows daily changes and trends. You can view historical data and price charts to understand market patterns over time.'
+      },
+      askQuestion: {
+        q: 'How do I ask a question?',
+        a: 'Click the "+" button and select "Write Blog" to share your knowledge and experiences with the community. You can also browse existing blog posts to learn from others.'
+      },
+      useAI: {
+        q: 'Can I use AI to get instant answers?',
+        a: 'Yes! Our AI Agronomist feature provides instant answers to common questions about coffee farming, diseases, soil management, and more. Look for the sparkle icon on questions.'
+      },
+      becomeExpert: {
+        q: 'How do I become a verified expert?',
+        a: 'Go to Profile → Expert Certifications and submit your credentials, certifications, or proof of expertise. Our team reviews applications and grants expert status to qualified members.'
+      },
+      postJob: {
+        q: 'How do I post a job?',
+        a: 'Click the "+" button, select "Post Job", fill in job details including title, description, location, pay, and requirements. Your job posting will be visible to all users.'
+      },
+      applyJob: {
+        q: 'How do I apply for a job?',
+        a: 'Browse the Job Board, click on a job that interests you, and click "Apply Now". You can contact the employer directly through the provided contact information.'
+      },
+      jobsVerified: {
+        q: 'Are job postings verified?',
+        a: 'We verify all job postings from registered businesses and cooperatives. Always verify job details directly with the employer before making any commitments.'
+      },
+      changeProfile: {
+        q: 'How do I change my profile information?',
+        a: 'Go to Profile → App Settings → Profile Information. You can update your name, email, phone number, and location at any time.'
+      },
+      changePassword: {
+        q: 'How do I change my password?',
+        a: 'Go to Profile → App Settings → Privacy & Security → Change Password. You\'ll need to enter your current password and set a new one.'
+      },
+      deleteAccount: {
+        q: 'Can I delete my account?',
+        a: 'Yes, but this action is permanent. Go to Profile → App Settings → Danger Zone → Delete Account. All your data, listings, and posts will be permanently removed.'
+      },
+      manageNotifications: {
+        q: 'How do I manage notifications?',
+        a: 'Go to Profile → App Settings → Notifications. You can toggle push notifications, email alerts, and customize which types of notifications you receive.'
+      },
+    },
+  },
+  contact: {
+    title: 'Contact Us',
+    captchaRequired: 'Please complete the CAPTCHA verification',
+    captchaError: 'CAPTCHA verification failed. Please try again.',
+    captchaExpired: 'CAPTCHA expired. Please verify again.',
+    phoneTitle: 'Phone',
+    emailTitle: 'Email',
+    addressTitle: 'Address',
+    officeHoursTitle: 'Office Hours',
+    mondayFriday: 'Monday - Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+    closed: 'Closed',
+    emergencySupport: 'Emergency Support',
+    emergencyText: '24/7 via email',
+    sendMessageTitle: 'Send us a Message',
+    yourName: 'Your Name',
+    emailAddress: 'Email Address',
+    phoneNumber: 'Phone Number',
+    subject: 'Subject',
+    message: 'Message',
+    sendMessage: 'Send Message',
+    sending: 'Sending...',
+    messageSent: 'Message Sent!',
+    thankYou: 'Thank you for contacting us. We will get back to you soon.',
+    sendAnother: 'Send Another Message',
+    connectWithUs: 'Connect With Us',
+    followUs: 'Follow us on social media for updates and news',
+    quickLinks: 'Quick Links',
+    namePlaceholder: 'Ram Thapa',
+    emailPlaceholder: 'your@email.com',
+    phonePlaceholder: '+977 9800000000',
+    subjectPlaceholder: 'How can we help?',
+    messagePlaceholder: 'Tell us more about your inquiry...',
+  },
   settings: {
     title: 'App Settings',
     profileInformation: 'Profile Information',

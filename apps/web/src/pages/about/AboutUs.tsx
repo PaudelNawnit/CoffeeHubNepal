@@ -2,6 +2,7 @@ import { ArrowLeft, Users, Target, Heart, Award, Coffee } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { t } from '@/i18n';
 import logoImage from '@/assets/images/logo/coffeelogo.png';
 import surajNepalImage from '@/assets/images/team/SurajNepal.png';
 import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.png';
@@ -34,7 +35,7 @@ const TEAM_MEMBERS = [
 ];
 
 export const AboutUs = () => {
-  const { setCurrentPage, setSubPage } = useApp();
+  const { setCurrentPage, setSubPage, language } = useApp();
   const { isAuthenticated } = useAuth();
 
   const handleBack = () => {
@@ -51,7 +52,7 @@ export const AboutUs = () => {
         <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-xl">
           <ArrowLeft size={20} />
         </button>
-        <h2 className="text-lg font-black text-[#6F4E37] flex-1">About Us</h2>
+        <h2 className="text-lg font-black text-[#6F4E37] flex-1">{t(language, 'about.title')}</h2>
       </div>
 
       <div className="p-6 lg:p-8 lg:max-w-5xl lg:mx-auto space-y-8">
@@ -64,7 +65,7 @@ export const AboutUs = () => {
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-4xl font-black mb-4">CoffeeHubNepal</h1>
               <p className="text-lg text-white/90 leading-relaxed">
-                Empowering Nepal's coffee community through technology, knowledge sharing, and trusted connections.
+                {t(language, 'about.tagline')}
               </p>
             </div>
           </div>
@@ -77,11 +78,10 @@ export const AboutUs = () => {
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
                 <Target className="text-blue-600" size={24} />
               </div>
-              <h3 className="text-xl font-black">Our Mission</h3>
+              <h3 className="text-xl font-black">{t(language, 'about.missionTitle')}</h3>
             </div>
             <p className="text-gray-700 leading-relaxed">
-              To create a unified platform that connects coffee farmers, roasters, traders, and enthusiasts across Nepal, 
-              fostering knowledge exchange, fair trade, and sustainable growth in the coffee industry.
+              {t(language, 'about.missionText')}
             </p>
           </Card>
 
@@ -90,11 +90,10 @@ export const AboutUs = () => {
               <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center">
                 <Heart className="text-green-600" size={24} />
               </div>
-              <h3 className="text-xl font-black">Our Vision</h3>
+              <h3 className="text-xl font-black">{t(language, 'about.visionTitle')}</h3>
             </div>
             <p className="text-gray-700 leading-relaxed">
-              To become Nepal's leading digital ecosystem for coffee, where every farmer has access to markets, 
-              knowledge, and opportunities to thrive in the global coffee industry.
+              {t(language, 'about.visionText')}
             </p>
           </Card>
         </div>
@@ -103,33 +102,33 @@ export const AboutUs = () => {
         <Card className="p-6 lg:p-8">
           <div className="flex items-center gap-3 mb-6">
             <Coffee className="text-[#6F4E37]" size={28} />
-            <h3 className="text-2xl font-black">What We Do</h3>
+            <h3 className="text-2xl font-black">{t(language, 'about.whatWeDoTitle')}</h3>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Connect farmers with buyers and exporters</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo1')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Provide real-time market prices and trends</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo2')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Facilitate knowledge sharing through blog posts and community discussions</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo3')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Verify farmers to build trust in the community</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo4')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Share government notices and opportunities</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo5')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-2 h-2 bg-[#6F4E37] rounded-full mt-2"></div>
-              <p className="text-gray-700">Create job opportunities in the coffee sector</p>
+              <p className="text-gray-700">{t(language, 'about.whatWeDo6')}</p>
             </div>
           </div>
         </Card>
@@ -138,7 +137,7 @@ export const AboutUs = () => {
         <div>
           <div className="flex items-center gap-3 mb-6">
             <Users className="text-[#6F4E37]" size={28} />
-            <h3 className="text-2xl font-black">Our Team</h3>
+            <h3 className="text-2xl font-black">{t(language, 'about.teamTitle')}</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {TEAM_MEMBERS.map((member, idx) => (
@@ -157,20 +156,20 @@ export const AboutUs = () => {
         <Card className="p-6 lg:p-8 bg-gradient-to-br from-[#F5EFE6] to-white">
           <div className="flex items-center gap-3 mb-6">
             <Award className="text-[#6F4E37]" size={28} />
-            <h3 className="text-2xl font-black">Our Values</h3>
+            <h3 className="text-2xl font-black">{t(language, 'about.valuesTitle')}</h3>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <div>
-              <h4 className="font-black text-lg mb-2">Transparency</h4>
-              <p className="text-sm text-gray-600">Open and honest communication in all our dealings</p>
+              <h4 className="font-black text-lg mb-2">{t(language, 'about.transparencyTitle')}</h4>
+              <p className="text-sm text-gray-600">{t(language, 'about.transparencyText')}</p>
             </div>
             <div>
-              <h4 className="font-black text-lg mb-2">Community First</h4>
-              <p className="text-sm text-gray-600">Putting the needs of our coffee community at the center</p>
+              <h4 className="font-black text-lg mb-2">{t(language, 'about.communityFirstTitle')}</h4>
+              <p className="text-sm text-gray-600">{t(language, 'about.communityFirstText')}</p>
             </div>
             <div>
-              <h4 className="font-black text-lg mb-2">Innovation</h4>
-              <p className="text-sm text-gray-600">Using technology to solve real-world problems</p>
+              <h4 className="font-black text-lg mb-2">{t(language, 'about.innovationTitle')}</h4>
+              <p className="text-sm text-gray-600">{t(language, 'about.innovationText')}</p>
             </div>
           </div>
         </Card>
