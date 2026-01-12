@@ -31,6 +31,8 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
   const containerId = useId().replace(/:/g, '_');
   const widgetIdRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isRenderedRef = useRef<boolean>(false);
+  const isRenderingRef = useRef<boolean>(false);
   const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   // If no site key is configured, skip captcha and auto-verify
@@ -46,13 +48,26 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
     let checkInterval: ReturnType<typeof setInterval> | null = null;
 
     const renderCaptcha = () => {
-      // Only render if container exists and widget hasn't been rendered yet
-      if (containerRef.current && widgetIdRef.current === null && window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-        // Clear container to prevent double render
-        if (containerRef.current.innerHTML.trim() !== '') {
-          containerRef.current.innerHTML = '';
+      // Prevent multiple simultaneous render attempts
+      if (isRenderingRef.current) return;
+      
+      // Only render if container exists, widget hasn't been rendered, and container is empty
+      if (
+        containerRef.current && 
+        widgetIdRef.current === null && 
+        !isRenderedRef.current &&
+        window.grecaptcha && 
+        typeof window.grecaptcha.render === 'function'
+      ) {
+        // Check if container already has reCAPTCHA elements (iframes)
+        const hasRecaptchaElements = containerRef.current.querySelector('iframe[src*="recaptcha"]');
+        if (hasRecaptchaElements) {
+          // Widget already exists, don't render again
+          isRenderedRef.current = true;
+          return;
         }
         
+        isRenderingRef.current = true;
         try {
           widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
             sitekey: siteKey,
@@ -66,37 +81,17 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
               onExpire?.();
             }
           });
+          isRenderedRef.current = true;
         } catch (error: any) {
-          // If widget already exists, clear and try again
+          // If widget already exists, mark as rendered and don't retry
           if (error?.message?.includes('already been rendered')) {
-            if (containerRef.current) {
-              containerRef.current.innerHTML = '';
-              widgetIdRef.current = null;
-              // Try rendering again after a short delay
-              setTimeout(() => {
-                if (containerRef.current && window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-                  try {
-                    widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
-                      sitekey: siteKey,
-                      callback: (token: string) => {
-                        onVerify(token);
-                      },
-                      'error-callback': () => {
-                        onError?.();
-                      },
-                      'expired-callback': () => {
-                        onExpire?.();
-                      }
-                    });
-                  } catch (retryError) {
-                    console.warn('reCAPTCHA retry render error:', retryError);
-                  }
-                }
-              }, 100);
-            }
+            isRenderedRef.current = true;
+            // Widget exists, just mark it as rendered - don't try to render again
           } else {
             console.warn('reCAPTCHA render error:', error);
           }
+        } finally {
+          isRenderingRef.current = false;
         }
       }
     };
@@ -151,12 +146,17 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
         }
       }
       
-      // Clear container
+      // Clear container completely
       if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+        // Remove all child nodes
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
       }
       
       widgetIdRef.current = null;
+      isRenderedRef.current = false;
+      isRenderingRef.current = false;
       
       // Clear any intervals
       if (checkInterval) {
