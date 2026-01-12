@@ -6,7 +6,7 @@ import { Badge } from '@/components/common/Badge';
 import { LikeButton } from '@/components/blog/LikeButton';
 import { CommentSection } from '@/components/blog/CommentSection';
 import { ReportModal } from '@/components/blog/ReportModal';
-import { blogService, BlogPost } from '@/services/blog.service';
+import { blogService, BlogPost, getAuthorName, getAuthorAvatar, getAuthorId } from '@/services/blog.service';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatDate } from '@/utils/formatDate';
@@ -140,7 +140,7 @@ export const BlogDetail = ({ postId, onBack }: BlogDetailProps) => {
     }
   };
 
-  const isAuthor = post && user && post.author === (user.mongoId || user.id.toString());
+  const isAuthor = post && user && getAuthorId(post) === (user.mongoId || user.id.toString());
 
   if (loading) {
     return (
@@ -217,11 +217,29 @@ export const BlogDetail = ({ postId, onBack }: BlogDetailProps) => {
         <Card className="p-6 lg:p-8">
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#6F4E37] rounded-full flex items-center justify-center text-white font-bold text-lg">
-                {post.authorName.charAt(0).toUpperCase()}
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                {getAuthorAvatar(post) ? (
+                  <img 
+                    src={getAuthorAvatar(post)!} 
+                    alt={getAuthorName(post)}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Replace with fallback initial on error
+                      const target = e.target as HTMLImageElement;
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<div class="w-full h-full bg-[#6F4E37] flex items-center justify-center text-white font-bold text-lg">${getAuthorName(post).charAt(0).toUpperCase()}</div>`;
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#6F4E37] flex items-center justify-center text-white font-bold text-lg">
+                    {getAuthorName(post).charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
               <div>
-                <p className="text-sm font-black text-gray-700">{post.authorName}</p>
+                <p className="text-sm font-black text-gray-700">{getAuthorName(post)}</p>
                 <p className="text-[10px] text-gray-400 flex items-center gap-1">
                   <Calendar size={10} />
                   {formatDate(post.createdAt)}

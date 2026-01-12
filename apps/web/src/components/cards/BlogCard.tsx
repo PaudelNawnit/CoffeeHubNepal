@@ -2,7 +2,7 @@ import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
 import { Heart, MessageSquare, Calendar } from 'lucide-react';
 import { formatDate } from '@/utils/formatDate';
-import { BlogPost } from '@/services/blog.service';
+import { BlogPost, getAuthorName, getAuthorAvatar } from '@/services/blog.service';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -16,6 +16,10 @@ export const BlogCard = ({ post, onCardClick, onLike, currentUserId }: BlogCardP
   const likesCount = post.likes.length;
   const commentsCount = post.comments.length;
   
+  // Get current author info (populated data takes priority over stored data)
+  const authorName = getAuthorName(post);
+  const authorAvatar = getAuthorAvatar(post);
+  
   // Truncate content for preview
   const preview = post.content.length > 150 
     ? post.content.substring(0, 150) + '...' 
@@ -25,11 +29,29 @@ export const BlogCard = ({ post, onCardClick, onLike, currentUserId }: BlogCardP
     <Card className="p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={onCardClick}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#6F4E37] rounded-full flex items-center justify-center text-white font-bold text-sm">
-            {post.authorName.charAt(0).toUpperCase()}
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+            {authorAvatar ? (
+              <img 
+                src={authorAvatar} 
+                alt={authorName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Replace with fallback initial on error
+                  const target = e.target as HTMLImageElement;
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `<div class="w-full h-full bg-[#6F4E37] flex items-center justify-center text-white font-bold text-sm">${authorName.charAt(0).toUpperCase()}</div>`;
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-[#6F4E37] flex items-center justify-center text-white font-bold text-sm">
+                {authorName.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
-            <p className="text-xs font-black text-gray-700">{post.authorName}</p>
+            <p className="text-xs font-black text-gray-700">{authorName}</p>
             <p className="text-[10px] text-gray-400 flex items-center gap-1">
               <Calendar size={10} />
               {formatDate(post.createdAt)}

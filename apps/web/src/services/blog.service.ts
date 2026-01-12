@@ -1,12 +1,19 @@
 import { API_BASE_URL } from '@/utils/constants';
 import { getCached, setCached, clearCache } from '@/utils/cache';
 
+// Populated author data from User model (current user info)
+export interface PopulatedAuthor {
+  _id: string;
+  name?: string;
+  avatar?: string;
+}
+
 export interface BlogPost {
   _id: string;
   title: string;
   content: string;
-  author: string;
-  authorName: string;
+  author: string | PopulatedAuthor; // Can be string (ID) or populated object
+  authorName: string; // Stored at creation time (fallback)
   authorEmail: string;
   category: string;
   tags: string[];
@@ -17,6 +24,30 @@ export interface BlogPost {
   createdAt: string;
   updatedAt: string;
 }
+
+// Helper to get current author name (populated data takes priority)
+export const getAuthorName = (post: BlogPost): string => {
+  if (typeof post.author === 'object' && post.author?.name) {
+    return post.author.name;
+  }
+  return post.authorName; // Fallback to stored name
+};
+
+// Helper to get current author avatar (from populated data)
+export const getAuthorAvatar = (post: BlogPost): string | null => {
+  if (typeof post.author === 'object' && post.author?.avatar) {
+    return post.author.avatar;
+  }
+  return null;
+};
+
+// Helper to get author ID
+export const getAuthorId = (post: BlogPost): string => {
+  if (typeof post.author === 'object' && post.author?._id) {
+    return post.author._id;
+  }
+  return post.author as string;
+};
 
 export interface Comment {
   _id: string;
