@@ -45,7 +45,7 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
 
     const renderCaptcha = () => {
       // Only render if container exists and widget hasn't been rendered yet
-      if (containerRef.current && widgetIdRef.current === null && window.grecaptcha) {
+      if (containerRef.current && widgetIdRef.current === null && window.grecaptcha && typeof window.grecaptcha.render === 'function') {
         try {
           widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
             sitekey: siteKey,
@@ -67,7 +67,7 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
     };
 
     // Check if grecaptcha is already loaded
-    if (window.grecaptcha && window.grecaptcha.render) {
+    if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
       // Use grecaptcha.ready to ensure API is fully loaded
       window.grecaptcha.ready(renderCaptcha);
     } else {
@@ -92,7 +92,7 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
       } else {
         // Script exists but grecaptcha not ready yet, poll for it
         const checkInterval = setInterval(() => {
-          if (window.grecaptcha && window.grecaptcha.render) {
+          if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
             clearInterval(checkInterval);
             window.grecaptcha.ready(renderCaptcha);
           }
