@@ -43,9 +43,16 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
   useEffect(() => {
     if (!siteKey) return;
 
+    let checkInterval: NodeJS.Timeout | null = null;
+
     const renderCaptcha = () => {
       // Only render if container exists and widget hasn't been rendered yet
       if (containerRef.current && widgetIdRef.current === null && window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+        // Clear container to prevent double render
+        if (containerRef.current.innerHTML.trim() !== '') {
+          containerRef.current.innerHTML = '';
+        }
+        
         try {
           widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
             sitekey: siteKey,
@@ -59,9 +66,37 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
               onExpire?.();
             }
           });
-        } catch (error) {
-          // Widget might already be rendered, try to reset it
-          console.warn('reCAPTCHA render error:', error);
+        } catch (error: any) {
+          // If widget already exists, clear and try again
+          if (error?.message?.includes('already been rendered')) {
+            if (containerRef.current) {
+              containerRef.current.innerHTML = '';
+              widgetIdRef.current = null;
+              // Try rendering again after a short delay
+              setTimeout(() => {
+                if (containerRef.current && window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+                  try {
+                    widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
+                      sitekey: siteKey,
+                      callback: (token: string) => {
+                        onVerify(token);
+                      },
+                      'error-callback': () => {
+                        onError?.();
+                      },
+                      'expired-callback': () => {
+                        onExpire?.();
+                      }
+                    });
+                  } catch (retryError) {
+                    console.warn('reCAPTCHA retry render error:', retryError);
+                  }
+                }
+              }, 100);
+            }
+          } else {
+            console.warn('reCAPTCHA render error:', error);
+          }
         }
       }
     };
@@ -91,21 +126,42 @@ export const Captcha = ({ onVerify, onError, onExpire }: CaptchaProps) => {
         document.head.appendChild(script);
       } else {
         // Script exists but grecaptcha not ready yet, poll for it
-        const checkInterval = setInterval(() => {
+        checkInterval = setInterval(() => {
           if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-            clearInterval(checkInterval);
+            if (checkInterval) clearInterval(checkInterval);
             window.grecaptcha.ready(renderCaptcha);
           }
         }, 100);
 
         // Clear interval after 10 seconds to prevent memory leak
-        setTimeout(() => clearInterval(checkInterval), 10000);
+        setTimeout(() => {
+          if (checkInterval) clearInterval(checkInterval);
+        }, 10000);
       }
     }
 
     // Cleanup function
     return () => {
+      // Reset widget if it exists
+      if (widgetIdRef.current !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+        try {
+          window.grecaptcha.reset(widgetIdRef.current);
+        } catch (error) {
+          // Ignore reset errors
+        }
+      }
+      
+      // Clear container
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+      
       widgetIdRef.current = null;
+      
+      // Clear any intervals
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
     };
   }, [siteKey, onVerify, onError, onExpire]);
 

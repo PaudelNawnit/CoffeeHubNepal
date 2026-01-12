@@ -368,6 +368,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                     setFormData({ ...formData, email: e.target.value });
                     if (errors.email) setErrors({ ...errors, email: '' });
                   }}
+                  autoComplete="email"
                   error={errors.email}
                   required
                 />
@@ -559,6 +560,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                         setFormData({ ...formData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: '' });
                       }}
+                      autoComplete="new-password"
                       className={`w-full bg-white border rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm ${
                         errors.password ? 'border-red-300' : 'border-[#EBE3D5]'
                       }`}
@@ -606,6 +608,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                         setFormData({ ...formData, confirmPassword: e.target.value });
                         if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
                       }}
+                      autoComplete="new-password"
                       className={`w-full bg-white border rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm ${
                         errors.confirmPassword ? 'border-red-300' : 'border-[#EBE3D5]'
                       }`}

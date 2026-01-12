@@ -175,6 +175,7 @@ export const Login = ({ onBack, onSuccess }: LoginProps) => {
                 setError('');
                 setSuccess(false);
               }}
+              autoComplete="email"
               required
             />
 
@@ -188,6 +189,7 @@ export const Login = ({ onBack, onSuccess }: LoginProps) => {
                 setError('');
                 setSuccess(false);
               }}
+              autoComplete="current-password"
               required
             />
 
