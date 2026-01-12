@@ -85,7 +85,7 @@ router.get('/stats', authenticate, requireAdminOrModerator, async (req: AuthRequ
 });
 
 // Get a single contact (admin/moderator only)
-router.get('/:id', authenticate, requireAdminOrModerator, validateObjectId, async (req: AuthRequest, res: Response) => {
+router.get('/:id', authenticate, requireAdminOrModerator, validateObjectId(), async (req: AuthRequest, res: Response) => {
   try {
     const contact = await getContactById(req.params.id);
     
@@ -101,7 +101,7 @@ router.get('/:id', authenticate, requireAdminOrModerator, validateObjectId, asyn
 });
 
 // Update a contact (admin/moderator only)
-router.put('/:id', authenticate, requireAdminOrModerator, validateObjectId, validate(updateContactSchema), async (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticate, requireAdminOrModerator, validateObjectId(), validate(updateContactSchema), async (req: AuthRequest, res: Response) => {
   try {
     const contact = await updateContact(req.params.id, req.body, req.userId!);
     return res.json({
@@ -131,7 +131,7 @@ router.put('/:id', authenticate, requireAdminOrModerator, validateObjectId, vali
 });
 
 // Delete a contact (admin only)
-router.delete('/:id', authenticate, requireAdminOrModerator, validateObjectId, async (req: AuthRequest, res: Response) => {
+router.delete('/:id', authenticate, requireAdminOrModerator, validateObjectId(), async (req: AuthRequest, res: Response) => {
   try {
     await deleteContact(req.params.id);
     return res.json({ message: 'Contact deleted successfully' });
