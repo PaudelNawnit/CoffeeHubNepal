@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { User, UserDocument, UserRole } from '../models/User.js';
 import { sendPasswordResetEmail } from './emailService.js';
+import { hasVerifiedOTP, cleanupOTP } from './otpService.js';
 
 const SALT_ROUNDS = 10;
 
@@ -20,7 +21,7 @@ const tokenForUser = (user: UserDocument) =>
     sub: user._id.toString(), 
     email: user.email,
     role: user.role || 'farmer'
-  }, env.jwtSecret, { expiresIn: '2h' });
+  }, env.jwtSecret, { expiresIn: '7d' });
 
 const isLocked = (user: UserDocument) => user.lockUntil && user.lockUntil > new Date();
 
@@ -32,7 +33,15 @@ export const signup = async (
   phone?: string,
   location?: string
 ) => {
-  const existing = await User.findOne({ email });
+  const normalizedEmail = email.toLowerCase().trim();
+  
+  // Check if email has verified OTP
+  const otpVerified = await hasVerifiedOTP(normalizedEmail);
+  if (!otpVerified) {
+    throw new Error('OTP_NOT_VERIFIED');
+  }
+  
+  const existing = await User.findOne({ email: normalizedEmail });
   if (existing) {
     throw new Error('EMAIL_IN_USE');
   }
@@ -46,7 +55,7 @@ export const signup = async (
   
   const passwordHash = await hashPassword(password);
   const user = await User.create({ 
-    email, 
+    email: normalizedEmail, 
     passwordHash,
     name: name || undefined,
     role: userRole,
@@ -54,6 +63,10 @@ export const signup = async (
     location: location || undefined,
     verified: false
   });
+  
+  // Clean up the OTP after successful signup
+  await cleanupOTP(normalizedEmail);
+  
   return { token: tokenForUser(user), user };
 };
 

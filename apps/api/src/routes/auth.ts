@@ -5,6 +5,7 @@ import { accountRateLimiter, passwordResetRateLimiter } from '../middleware/rate
 import { validate } from '../middleware/validate.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { isPasswordStrong, login, signup, requestPasswordReset, resetPassword } from '../services/authService.js';
+import { sendSignupOTP, verifySignupOTP, resendSignupOTP } from '../services/otpService.js';
 import { User } from '../models/User.js';
 
 const router = Router();
@@ -30,6 +31,15 @@ const loginSchema = z.object({
   password: z.string().min(1)
 });
 
+const sendOTPSchema = z.object({
+  email: emailSchema
+});
+
+const verifyOTPSchema = z.object({
+  email: emailSchema,
+  otp: z.string().length(6, 'OTP must be 6 digits')
+});
+
 const forgotPasswordSchema = z.object({
   email: emailSchema
 });
@@ -38,6 +48,131 @@ const resetPasswordSchema = z.object({
   token: z.string().min(1),
   password: passwordSchema
 });
+
+// Send OTP for signup email verification
+router.post(
+  '/send-otp',
+  accountRateLimiter,
+  captchaCheck,
+  validate(sendOTPSchema),
+  async (req, res) => {
+    const { email } = req.body;
+    try {
+      const result = await sendSignupOTP(email);
+      return res.json(result);
+    } catch (error) {
+      const err = (error as Error).message;
+      if (err === 'EMAIL_IN_USE') {
+        return res.status(409).json({ 
+          error: 'EMAIL_IN_USE', 
+          code: 'EMAIL_IN_USE',
+          message: 'This email is already registered. Please log in instead.'
+        });
+      }
+      if (err.startsWith('WAIT_')) {
+        const seconds = err.replace('WAIT_', '').replace('_SECONDS', '');
+        return res.status(429).json({ 
+          error: 'TOO_MANY_REQUESTS', 
+          code: 'TOO_MANY_REQUESTS',
+          message: `Please wait ${seconds} seconds before requesting another OTP.`,
+          waitTime: parseInt(seconds)
+        });
+      }
+      if (err === 'FAILED_TO_SEND_OTP') {
+        return res.status(500).json({ 
+          error: 'FAILED_TO_SEND_OTP', 
+          code: 'FAILED_TO_SEND_OTP',
+          message: 'Failed to send verification code. Please try again.'
+        });
+      }
+      console.error('Send OTP error:', error);
+      return res.status(500).json({ error: 'SEND_OTP_FAILED' });
+    }
+  }
+);
+
+// Verify OTP for signup
+router.post(
+  '/verify-otp',
+  accountRateLimiter,
+  validate(verifyOTPSchema),
+  async (req, res) => {
+    const { email, otp } = req.body;
+    try {
+      const result = await verifySignupOTP(email, otp);
+      return res.json(result);
+    } catch (error) {
+      const err = (error as Error).message;
+      if (err === 'OTP_NOT_FOUND') {
+        return res.status(404).json({ 
+          error: 'OTP_NOT_FOUND', 
+          code: 'OTP_NOT_FOUND',
+          message: 'No verification code found. Please request a new one.'
+        });
+      }
+      if (err === 'OTP_EXPIRED') {
+        return res.status(400).json({ 
+          error: 'OTP_EXPIRED', 
+          code: 'OTP_EXPIRED',
+          message: 'Verification code has expired. Please request a new one.'
+        });
+      }
+      if (err === 'MAX_ATTEMPTS_EXCEEDED') {
+        return res.status(429).json({ 
+          error: 'MAX_ATTEMPTS_EXCEEDED', 
+          code: 'MAX_ATTEMPTS_EXCEEDED',
+          message: 'Too many incorrect attempts. Please request a new verification code.'
+        });
+      }
+      if (err.startsWith('INVALID_OTP_')) {
+        const remaining = err.replace('INVALID_OTP_', '').replace('_REMAINING', '');
+        return res.status(400).json({ 
+          error: 'INVALID_OTP', 
+          code: 'INVALID_OTP',
+          message: `Invalid verification code. ${remaining} attempts remaining.`,
+          remainingAttempts: parseInt(remaining)
+        });
+      }
+      console.error('Verify OTP error:', error);
+      return res.status(500).json({ error: 'VERIFY_OTP_FAILED' });
+    }
+  }
+);
+
+// Resend OTP for signup
+router.post(
+  '/resend-otp',
+  accountRateLimiter,
+  captchaCheck,
+  validate(sendOTPSchema),
+  async (req, res) => {
+    const { email } = req.body;
+    try {
+      const result = await resendSignupOTP(email);
+      return res.json(result);
+    } catch (error) {
+      const err = (error as Error).message;
+      if (err === 'EMAIL_IN_USE') {
+        return res.status(409).json({ 
+          error: 'EMAIL_IN_USE', 
+          code: 'EMAIL_IN_USE',
+          message: 'This email is already registered.'
+        });
+      }
+      if (err.startsWith('WAIT_')) {
+        const seconds = err.replace('WAIT_', '').replace('_SECONDS', '');
+        return res.status(429).json({ 
+          error: 'TOO_MANY_REQUESTS', 
+          code: 'TOO_MANY_REQUESTS',
+          message: `Please wait ${seconds} seconds before requesting another OTP.`,
+          waitTime: parseInt(seconds)
+        });
+      }
+      console.error('Resend OTP error:', error);
+      return res.status(500).json({ error: 'RESEND_OTP_FAILED' });
+    }
+  }
+);
 
 router.post(
   '/signup',
@@ -68,6 +203,13 @@ router.post(
       }
       if (err === 'WEAK_PASSWORD') {
         return res.status(400).json({ error: 'WEAK_PASSWORD', code: 'WEAK_PASSWORD' });
+      }
+      if (err === 'OTP_NOT_VERIFIED') {
+        return res.status(403).json({ 
+          error: 'OTP_NOT_VERIFIED', 
+          code: 'OTP_NOT_VERIFIED',
+          message: 'Please verify your email with OTP before completing registration.'
+        });
       }
       return res.status(500).json({ error: 'SIGNUP_FAILED' });
     }

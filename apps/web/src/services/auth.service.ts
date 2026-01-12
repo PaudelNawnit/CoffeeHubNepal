@@ -21,6 +21,15 @@ interface ApiError {
   details?: any;
   remainingAttempts?: number;
   unlocksInMs?: number;
+  waitTime?: number;
+}
+
+interface OTPResponse {
+  success: boolean;
+  message: string;
+  expiresIn?: number;
+  waitTime?: number;
+  remainingAttempts?: number;
 }
 
 export const authService = {
@@ -116,6 +125,127 @@ export const authService = {
         throw error;
       }
       throw new Error('Network error. Please check if the API server is running.');
+    }
+  },
+
+  // Send OTP for email verification during signup
+  async sendOTP(email: string, captchaToken?: string): Promise<OTPResponse> {
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (captchaToken) {
+        headers['x-captcha-token'] = captchaToken;
+      } else {
+        headers['x-captcha-token'] = 'captcha-disabled';
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error: ApiError = data;
+        if (error.code === 'EMAIL_IN_USE') {
+          throw new Error('This email is already registered. Please log in instead.');
+        }
+        if (error.code === 'TOO_MANY_REQUESTS') {
+          throw new Error(error.message || `Please wait before requesting another code.`);
+        }
+        if (error.code === 'FAILED_TO_SEND_OTP') {
+          throw new Error('Failed to send verification code. Please try again.');
+        }
+        throw new Error(error.message || 'Failed to send verification code.');
+      }
+
+      return data as OTPResponse;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Verify OTP
+  async verifyOTP(email: string, otp: string): Promise<OTPResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error: ApiError = data;
+        if (error.code === 'OTP_NOT_FOUND') {
+          throw new Error('No verification code found. Please request a new one.');
+        }
+        if (error.code === 'OTP_EXPIRED') {
+          throw new Error('Verification code has expired. Please request a new one.');
+        }
+        if (error.code === 'MAX_ATTEMPTS_EXCEEDED') {
+          throw new Error('Too many incorrect attempts. Please request a new code.');
+        }
+        if (error.code === 'INVALID_OTP') {
+          throw new Error(error.message || 'Invalid verification code.');
+        }
+        throw new Error(error.message || 'Verification failed.');
+      }
+
+      return data as OTPResponse;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Resend OTP
+  async resendOTP(email: string, captchaToken?: string): Promise<OTPResponse> {
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (captchaToken) {
+        headers['x-captcha-token'] = captchaToken;
+      } else {
+        headers['x-captcha-token'] = 'captcha-disabled';
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error: ApiError = data;
+        if (error.code === 'TOO_MANY_REQUESTS') {
+          throw new Error(error.message || `Please wait before requesting another code.`);
+        }
+        throw new Error(error.message || 'Failed to resend verification code.');
+      }
+
+      return data as OTPResponse;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection.');
     }
   },
 
