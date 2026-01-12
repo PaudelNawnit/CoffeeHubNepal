@@ -15,15 +15,6 @@ interface LoginProps {
   onSuccess?: () => void;
 }
 
-declare global {
-  interface Window {
-    grecaptcha?: {
-      getResponse: () => string;
-      reset?: () => void;
-    };
-  }
-}
-
 export const Login = ({ onBack, onSuccess }: LoginProps) => {
   const { navigate, setUserRole, setSubPage, language } = useApp();
   const { login } = useAuth();
