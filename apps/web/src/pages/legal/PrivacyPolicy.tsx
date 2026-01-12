@@ -1,14 +1,24 @@
 import { ArrowLeft, Shield, Lock, Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 
 export const PrivacyPolicy = () => {
-  const { setCurrentPage } = useApp();
+  const { setCurrentPage, setSubPage, navigate } = useApp();
+  const { isAuthenticated } = useAuth();
+
+  const handleBack = () => {
+    if (isAuthenticated) {
+      setCurrentPage('home');
+    } else {
+      setSubPage(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32 lg:pb-8">
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#EBE3D5] px-6 lg:px-8 py-4 flex items-center gap-4">
-        <button onClick={() => setCurrentPage('home')} className="p-2 hover:bg-gray-100 rounded-xl">
+        <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-xl">
           <ArrowLeft size={20} />
         </button>
         <h2 className="text-lg font-black text-[#6F4E37] flex-1">Privacy Policy</h2>
@@ -191,7 +201,7 @@ export const PrivacyPolicy = () => {
             If you have any questions or concerns about this Privacy Policy, please contact us.
           </p>
           <button
-            onClick={() => setCurrentPage('contact')}
+            onClick={() => navigate('contact')}
             className="px-6 py-3 bg-white text-[#6F4E37] rounded-xl font-black text-sm hover:bg-gray-100 transition-colors"
           >
             Contact Us

@@ -1,4 +1,4 @@
-import { ArrowLeft, Mail, Phone, MapPin, Send, MessageCircle, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Send, MessageCircle, Clock, CheckCircle, Facebook, Instagram } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -8,8 +8,8 @@ import { useState } from 'react';
 import { contactService } from '@/services/contact.service';
 
 export const ContactUs = () => {
-  const { setCurrentPage } = useApp();
-  const { user } = useAuth();
+  const { setCurrentPage, setSubPage, navigate } = useApp();
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -20,6 +20,14 @@ export const ContactUs = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleBack = () => {
+    if (isAuthenticated) {
+      setCurrentPage('home');
+    } else {
+      setSubPage(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +55,7 @@ export const ContactUs = () => {
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32 lg:pb-8">
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#EBE3D5] px-6 lg:px-8 py-4 flex items-center gap-4">
-        <button onClick={() => setCurrentPage('home')} className="p-2 hover:bg-gray-100 rounded-xl">
+        <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-xl">
           <ArrowLeft size={20} />
         </button>
         <h2 className="text-lg font-black text-[#6F4E37] flex-1">Contact Us</h2>
@@ -70,8 +78,9 @@ export const ContactUs = () => {
               <Mail className="text-green-600" size={24} />
             </div>
             <h4 className="font-black mb-2">Email</h4>
-            <p className="text-sm text-gray-600">info@coffeehubnepal.com</p>
-            <p className="text-sm text-gray-600">support@coffeehubnepal.com</p>
+            <a href="mailto:coffeehubnepal@gmail.com" className="text-sm text-gray-600 hover:text-[#6F4E37] transition-colors block">
+              coffeehubnepal@gmail.com
+            </a>
           </Card>
 
           <Card className="p-6 text-center">
@@ -214,36 +223,56 @@ export const ContactUs = () => {
             <div>
               <p className="text-sm text-white/80 mb-2">Follow us on social media for updates and news</p>
               <div className="flex gap-3">
-                <button className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <span className="text-xs font-black">FB</span>
-                </button>
-                <button className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <span className="text-xs font-black">IG</span>
-                </button>
-                <button className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <span className="text-xs font-black">TW</span>
-                </button>
+                <a 
+                  href="https://www.facebook.com/share/1DMMTypgRK/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-[#1877F2] transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </a>
+                <a 
+                  href="https://www.instagram.com/coffeehubnepal" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737] transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </a>
+                <a 
+                  href="https://www.tiktok.com/@coffeehubnepal" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-black transition-colors"
+                  aria-label="TikTok"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                  </svg>
+                </a>
               </div>
             </div>
             <div>
               <p className="text-sm text-white/80 mb-2">Quick Links</p>
               <div className="space-y-1">
                 <button 
-                  onClick={() => setCurrentPage('faq')}
+                  onClick={() => navigate('faq')}
                   className="text-sm text-white/90 hover:text-white underline"
                 >
                   FAQ
                 </button>
                 <span className="text-white/50 mx-2">•</span>
                 <button 
-                  onClick={() => setCurrentPage('privacy')}
+                  onClick={() => navigate('privacy')}
                   className="text-sm text-white/90 hover:text-white underline"
                 >
                   Privacy Policy
                 </button>
                 <span className="text-white/50 mx-2">•</span>
                 <button 
-                  onClick={() => setCurrentPage('terms')}
+                  onClick={() => navigate('terms')}
                   className="text-sm text-white/90 hover:text-white underline"
                 >
                   Terms of Service

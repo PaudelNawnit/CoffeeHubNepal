@@ -150,6 +150,22 @@ const AppContent = () => {
     );
   }
 
+  // Public pages (accessible without login) - render independently
+  const publicPages = ['about', 'contact', 'faq', 'privacy', 'terms'];
+  if (!isAuthenticated && subPage && publicPages.includes(subPage)) {
+    return (
+      <div className="min-h-screen bg-[#F8F5F2]">
+        <Suspense fallback={<PageLoader />}>
+          {subPage === 'about' && <AboutUs />}
+          {subPage === 'contact' && <ContactUs />}
+          {subPage === 'faq' && <FAQ />}
+          {subPage === 'privacy' && <PrivacyPolicy />}
+          {subPage === 'terms' && <TermsOfService />}
+        </Suspense>
+      </div>
+    );
+  }
+
   // Landing page (show when not authenticated and on home)
   if (currentPage === 'home' && !isAuthenticated && !subPage) {
     return <LandingPage />;

@@ -1,6 +1,7 @@
 import { ArrowLeft, HelpCircle, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 
 const FAQ_CATEGORIES = [
@@ -117,8 +118,17 @@ const FAQ_CATEGORIES = [
 ];
 
 export const FAQ = () => {
-  const { setCurrentPage } = useApp();
+  const { setCurrentPage, setSubPage, navigate } = useApp();
+  const { isAuthenticated } = useAuth();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const handleBack = () => {
+    if (isAuthenticated) {
+      setCurrentPage('home');
+    } else {
+      setSubPage(null);
+    }
+  };
 
   const toggleQuestion = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -127,7 +137,7 @@ export const FAQ = () => {
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32 lg:pb-8">
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#EBE3D5] px-6 lg:px-8 py-4 flex items-center gap-4">
-        <button onClick={() => setCurrentPage('home')} className="p-2 hover:bg-gray-100 rounded-xl">
+        <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-xl">
           <ArrowLeft size={20} />
         </button>
         <h2 className="text-lg font-black text-[#6F4E37] flex-1">Frequently Asked Questions</h2>
@@ -184,7 +194,7 @@ export const FAQ = () => {
             Can't find the answer you're looking for? Please reach out to our friendly support team.
           </p>
           <button
-            onClick={() => setCurrentPage('contact')}
+            onClick={() => navigate('contact')}
             className="px-6 py-3 bg-white text-[#6F4E37] rounded-xl font-black text-sm hover:bg-gray-100 transition-colors"
           >
             Contact Support
