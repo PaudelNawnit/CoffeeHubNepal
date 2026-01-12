@@ -84,7 +84,7 @@ router.post(
           waitTime: parseInt(seconds)
         });
       }
-      if (err === 'FAILED_TO_SEND_OTP') {
+      if (err === 'FAILED_TO_SEND_OTP' || err === 'FAILED_TO_CREATE_OTP') {
         return res.status(500).json({ 
           error: 'FAILED_TO_SEND_OTP', 
           code: 'FAILED_TO_SEND_OTP',
