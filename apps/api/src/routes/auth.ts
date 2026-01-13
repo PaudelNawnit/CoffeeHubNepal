@@ -107,10 +107,24 @@ router.post(
             message: 'Failed to send verification code. Please try again.'
           });
         }
+        // Log unexpected errors for debugging
+        console.error('[Auth Route] Unexpected error type:', {
+          errorMessage: err,
+          errorType: error?.constructor?.name,
+          errorStack: error?.stack,
+          errorDetails: error
+        });
         return res.status(500).json({ 
           error: 'SEND_OTP_FAILED',
           code: 'SEND_OTP_FAILED',
           message: err || 'Failed to send verification code. Please try again.'
+        });
+      } else {
+        // Headers already sent, log the error but can't send response
+        console.error('[Auth Route] Error occurred but headers already sent:', {
+          errorMessage: err,
+          errorType: error?.constructor?.name,
+          errorStack: error?.stack
         });
       }
     }

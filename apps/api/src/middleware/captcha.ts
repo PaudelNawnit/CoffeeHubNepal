@@ -140,11 +140,16 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
     // #region agent log
     try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:93',message:'captcha catch block',data:{errorMessage:error instanceof Error?error.message:String(error),errorName:error instanceof Error?error.name:'unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
     // #endregion
-    return res.status(500).json({
-      error: 'CAPTCHA_VERIFICATION_FAILED',
-      code: 'CAPTCHA_VERIFICATION_FAILED',
-      message: 'Failed to verify CAPTCHA. Please try again.'
-    });
+    // Ensure we don't send response if headers already sent
+    if (!res.headersSent) {
+      return res.status(500).json({
+        error: 'CAPTCHA_VERIFICATION_FAILED',
+        code: 'CAPTCHA_VERIFICATION_FAILED',
+        message: 'Failed to verify CAPTCHA. Please try again.'
+      });
+    }
+    // If headers already sent, pass error to next error handler
+    return next(error instanceof Error ? error : new Error(String(error)));
   }
 };
 
