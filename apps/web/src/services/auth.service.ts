@@ -129,7 +129,7 @@ export const authService = {
   },
 
   // Send OTP for email verification during signup
-  async sendOTP(email: string, captchaToken?: string): Promise<OTPResponse> {
+  async sendOTP(email: string, _captchaToken?: string): Promise<OTPResponse> {
     try {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ export const authService = {
   },
 
   // Resend OTP
-  async resendOTP(email: string, captchaToken?: string): Promise<OTPResponse> {
+  async resendOTP(email: string, _captchaToken?: string): Promise<OTPResponse> {
     try {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ export const authService = {
     }
   },
 
-  async register(data: RegisterData, captchaToken?: string) {
+  async register(data: RegisterData, _captchaToken?: string) {
     try {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
