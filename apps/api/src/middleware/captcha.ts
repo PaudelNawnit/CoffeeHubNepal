@@ -71,11 +71,14 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       // #region agent log
       try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:48',message:'captcha response not ok',data:{status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
       // #endregion
-      return res.status(500).json({
-        error: 'CAPTCHA_VERIFICATION_FAILED',
-        code: 'CAPTCHA_VERIFICATION_FAILED',
-        message: 'Failed to verify CAPTCHA. Please try again.'
-      });
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: 'CAPTCHA_VERIFICATION_FAILED',
+          code: 'CAPTCHA_VERIFICATION_FAILED',
+          message: 'Failed to verify CAPTCHA. Please try again.'
+        });
+      }
+      return next(new Error(`CAPTCHA verification request failed: ${response.status}`));
     }
 
     let data: any;
@@ -87,20 +90,32 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       data = JSON.parse(responseText);
     } catch (parseError) {
       console.error('CAPTCHA response parsing error:', parseError);
-      return res.status(500).json({
-        error: 'CAPTCHA_VERIFICATION_FAILED',
-        code: 'CAPTCHA_VERIFICATION_FAILED',
-        message: 'Failed to verify CAPTCHA. Please try again.'
-      });
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:88',message:'CAPTCHA parse error',data:{errorMessage:parseError instanceof Error?parseError.message:String(parseError)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+      // #endregion
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: 'CAPTCHA_VERIFICATION_FAILED',
+          code: 'CAPTCHA_VERIFICATION_FAILED',
+          message: 'Failed to verify CAPTCHA. Please try again.'
+        });
+      }
+      return next(parseError instanceof Error ? parseError : new Error(String(parseError)));
     }
 
     if (!data || typeof data !== 'object') {
       console.error('CAPTCHA verification returned invalid data:', data);
-      return res.status(500).json({
-        error: 'CAPTCHA_VERIFICATION_FAILED',
-        code: 'CAPTCHA_VERIFICATION_FAILED',
-        message: 'Failed to verify CAPTCHA. Please try again.'
-      });
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:97',message:'CAPTCHA invalid data',data:{dataType:typeof data,dataValue:data},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+      // #endregion
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: 'CAPTCHA_VERIFICATION_FAILED',
+          code: 'CAPTCHA_VERIFICATION_FAILED',
+          message: 'Failed to verify CAPTCHA. Please try again.'
+        });
+      }
+      return next(new Error('Invalid CAPTCHA response data'));
     }
 
     if (!data.success) {

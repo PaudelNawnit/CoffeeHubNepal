@@ -52,8 +52,7 @@ export const Login = ({ onBack, onSuccess }: LoginProps) => {
       setSuccess(true);
       setError('');
 
-      // Reset CAPTCHA on success (if available)
-      window.grecaptcha?.reset?.();
+      // Clear CAPTCHA token (component will handle its own cleanup on unmount)
       setCaptchaToken(null);
 
       // Wait a moment to show success animation
