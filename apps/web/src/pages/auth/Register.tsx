@@ -4,7 +4,8 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { LoadingOverlay } from '@/components/common/LoadingOverlay';
-import { Captcha } from '@/components/common/Captcha';
+// TEMPORARILY DISABLED: CAPTCHA for debugging OTP flow
+// import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/services/auth.service';
@@ -79,9 +80,10 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       newErrors.email = 'Invalid email format';
     }
     
-    if (!captchaToken) {
-      newErrors.captcha = 'Please complete the CAPTCHA verification';
-    }
+    // TEMPORARILY DISABLED: CAPTCHA validation for debugging
+    // if (!captchaToken) {
+    //   newErrors.captcha = 'Please complete the CAPTCHA verification';
+    // }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -119,10 +121,11 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       newErrors.acceptTerms = 'You must accept the terms and conditions';
     }
 
+    // TEMPORARILY DISABLED: CAPTCHA validation for debugging
     // Validate captcha for final registration
-    if (!captchaToken) {
-      newErrors.captcha = 'Please complete the CAPTCHA verification';
-    }
+    // if (!captchaToken) {
+    //   newErrors.captcha = 'Please complete the CAPTCHA verification';
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -384,7 +387,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   required
                 />
 
-                <div className="space-y-2">
+                {/* TEMPORARILY DISABLED: CAPTCHA for debugging OTP flow */}
+                {/* <div className="space-y-2">
                   <Captcha
                     onVerify={(token) => {
                       setCaptchaToken(token);
@@ -402,9 +406,9 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   {errors.captcha && (
                     <p className="text-xs text-red-600 font-bold text-center">{errors.captcha}</p>
                   )}
-                </div>
+                </div> */}
 
-                <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading || !captchaToken}>
+                <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading}>
                   {isLoading ? 'Sending...' : 'Send Verification Code'}
                 </Button>
 
@@ -675,8 +679,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   </label>
                 </div>
 
-                {/* CAPTCHA for final registration */}
-                <div className="space-y-2">
+                {/* TEMPORARILY DISABLED: CAPTCHA for debugging OTP flow */}
+                {/* <div className="space-y-2">
                   <Captcha
                     onVerify={(token) => {
                       setCaptchaToken(token);
@@ -694,9 +698,9 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   {errors.captcha && (
                     <p className="text-xs text-red-600 font-bold text-center">{errors.captcha}</p>
                   )}
-                </div>
+                </div> */}
 
-                <Button type="submit" variant="primary" className="w-full py-4 mt-6" disabled={isLoading || !captchaToken}>
+                <Button type="submit" variant="primary" className="w-full py-4 mt-6" disabled={isLoading}>
                   {isLoading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>

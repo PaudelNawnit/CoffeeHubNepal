@@ -135,11 +135,13 @@ export const authService = {
         'Content-Type': 'application/json',
       };
 
-      if (captchaToken) {
-        headers['x-captcha-token'] = captchaToken;
-      } else {
-        headers['x-captcha-token'] = 'captcha-disabled';
-      }
+      // TEMPORARILY DISABLED: Always send captcha-disabled for debugging
+      headers['x-captcha-token'] = 'captcha-disabled';
+      // if (captchaToken) {
+      //   headers['x-captcha-token'] = captchaToken;
+      // } else {
+      //   headers['x-captcha-token'] = 'captcha-disabled';
+      // }
 
       const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
         method: 'POST',
@@ -218,11 +220,13 @@ export const authService = {
         'Content-Type': 'application/json',
       };
 
-      if (captchaToken) {
-        headers['x-captcha-token'] = captchaToken;
-      } else {
-        headers['x-captcha-token'] = 'captcha-disabled';
-      }
+      // TEMPORARILY DISABLED: Always send captcha-disabled for debugging
+      headers['x-captcha-token'] = 'captcha-disabled';
+      // if (captchaToken) {
+      //   headers['x-captcha-token'] = captchaToken;
+      // } else {
+      //   headers['x-captcha-token'] = 'captcha-disabled';
+      // }
 
       const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
         method: 'POST',
@@ -255,12 +259,13 @@ export const authService = {
         'Content-Type': 'application/json',
       };
       
-      // Add CAPTCHA token to headers if provided, or send 'captcha-disabled' if not
-      if (captchaToken) {
-        headers['x-captcha-token'] = captchaToken;
-      } else {
-        headers['x-captcha-token'] = 'captcha-disabled';
-      }
+      // TEMPORARILY DISABLED: Always send captcha-disabled for debugging
+      headers['x-captcha-token'] = 'captcha-disabled';
+      // if (captchaToken) {
+      //   headers['x-captcha-token'] = captchaToken;
+      // } else {
+      //   headers['x-captcha-token'] = 'captcha-disabled';
+      // }
 
       const requestBody = {
         email: data.email,
