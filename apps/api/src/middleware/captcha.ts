@@ -104,14 +104,29 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
     }
 
     if (!data.success) {
-      console.error('CAPTCHA verification failed:', data['error-codes'] || data);
+      const errorCodes = data['error-codes'] || [];
+      console.error('CAPTCHA verification failed:', errorCodes);
+      console.error('CAPTCHA response data:', JSON.stringify(data, null, 2));
       // #region agent log
-      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:81',message:'captcha verification failed',data:{errorCodes:data['error-codes']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:81',message:'captcha verification failed',data:{errorCodes:errorCodes,fullResponse:data,hasSecret:!!env.captchaSecret},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
       // #endregion
+      
+      // Provide more specific error messages based on error codes
+      let errorMessage = 'CAPTCHA verification failed. Please try again.';
+      if (Array.isArray(errorCodes) && errorCodes.length > 0) {
+        if (errorCodes.includes('invalid-input-secret')) {
+          errorMessage = 'CAPTCHA configuration error. Please contact support.';
+        } else if (errorCodes.includes('timeout-or-duplicate')) {
+          errorMessage = 'CAPTCHA token expired or already used. Please verify again.';
+        } else if (errorCodes.includes('bad-request')) {
+          errorMessage = 'Invalid CAPTCHA request. Please try again.';
+        }
+      }
+      
       return res.status(400).json({
         error: 'CAPTCHA_INVALID',
         code: 'CAPTCHA_INVALID',
-        message: 'CAPTCHA verification failed. Please try again.'
+        message: errorMessage
       });
     }
 
