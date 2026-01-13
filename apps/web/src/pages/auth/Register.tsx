@@ -119,6 +119,11 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       newErrors.acceptTerms = 'You must accept the terms and conditions';
     }
 
+    // Validate captcha for final registration
+    if (!captchaToken) {
+      newErrors.captcha = 'Please complete the CAPTCHA verification';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -207,6 +212,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
     try {
       await authService.verifyOTP(formData.email, otpString);
       setStep('details');
+      // Reset captcha token when moving to details step - user will need to verify again
+      setCaptchaToken(null);
     } catch (err: any) {
       setSubmitError(err.message || 'Verification failed');
     } finally {
@@ -283,9 +290,13 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       setStep('email');
       setOtp(['', '', '', '', '', '']);
       setSubmitError('');
+      // Reset captcha token when going back to email step
+      setCaptchaToken(null);
     } else if (step === 'details') {
       setStep('otp');
       setSubmitError('');
+      // Reset captcha token when going back to OTP step
+      setCaptchaToken(null);
     } else if (onBack) {
       onBack();
     }
@@ -393,7 +404,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   )}
                 </div>
 
-                <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading}>
+                <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading || !captchaToken}>
                   {isLoading ? 'Sending...' : 'Send Verification Code'}
                 </Button>
 
@@ -664,7 +675,28 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                   </label>
                 </div>
 
-                <Button type="submit" variant="primary" className="w-full py-4 mt-6" disabled={isLoading}>
+                {/* CAPTCHA for final registration */}
+                <div className="space-y-2">
+                  <Captcha
+                    onVerify={(token) => {
+                      setCaptchaToken(token);
+                      if (errors.captcha) setErrors({ ...errors, captcha: '' });
+                    }}
+                    onError={() => {
+                      setCaptchaToken(null);
+                      setErrors({ ...errors, captcha: 'CAPTCHA verification failed.' });
+                    }}
+                    onExpire={() => {
+                      setCaptchaToken(null);
+                      setErrors({ ...errors, captcha: 'CAPTCHA expired.' });
+                    }}
+                  />
+                  {errors.captcha && (
+                    <p className="text-xs text-red-600 font-bold text-center">{errors.captcha}</p>
+                  )}
+                </div>
+
+                <Button type="submit" variant="primary" className="w-full py-4 mt-6" disabled={isLoading || !captchaToken}>
                   {isLoading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
