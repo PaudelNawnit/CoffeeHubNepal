@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { appendFileSync } from 'fs';
 import { env } from '../config/env.js';
 
 /**
@@ -6,22 +7,44 @@ import { env } from '../config/env.js';
  * Verifies Google reCAPTCHA v2/v3 tokens
  */
 export const captchaCheck = async (req: Request, res: Response, next: NextFunction) => {
+  // #region agent log
+  try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:8',message:'captchaCheck entry',data:{hasSecret:!!env.captchaSecret,path:req.path},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+  // #endregion
   // Skip CAPTCHA check if secret is not configured
   if (!env.captchaSecret) {
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:11',message:'captchaCheck skip - no secret',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})+'\n');}catch(e){}
+    // #endregion
     return next();
   }
 
-  const token = req.headers['x-captcha-token'];
+  // Get token from headers (handle both string and array formats)
+  const tokenHeader = req.headers['x-captcha-token'];
+  const token = Array.isArray(tokenHeader) ? tokenHeader[0] : tokenHeader;
+  // #region agent log
+  try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:16',message:'token extracted',data:{hasToken:!!token,tokenType:typeof token,tokenLength:token?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+  // #endregion
+  
   if (!token || typeof token !== 'string') {
+    console.error('[CAPTCHA] Missing or invalid token header:', { token, headers: req.headers });
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:19',message:'captcha token missing',data:{tokenType:typeof token},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
     return res.status(400).json({ error: 'CAPTCHA_REQUIRED', code: 'CAPTCHA_REQUIRED' });
   }
 
   // Allow 'captcha-disabled' token (for development or when CAPTCHA is optional)
   if (token === 'captcha-disabled') {
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:24',message:'captcha disabled token',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
     return next();
   }
 
   try {
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:28',message:'starting captcha verification',data:{tokenLength:token.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
     // Verify token with Google reCAPTCHA
     const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
 
@@ -39,9 +62,15 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       },
       body: params.toString(),
     });
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:45',message:'captcha fetch response',data:{status:response.status,ok:response.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
 
     if (!response.ok) {
       console.error('CAPTCHA verification request failed:', response.status, response.statusText);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:48',message:'captcha response not ok',data:{status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+      // #endregion
       return res.status(500).json({
         error: 'CAPTCHA_VERIFICATION_FAILED',
         code: 'CAPTCHA_VERIFICATION_FAILED',
@@ -49,10 +78,36 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
       });
     }
 
-    const data: any = await response.json();
+    let data: any;
+    try {
+      const responseText = await response.text();
+      if (!responseText) {
+        throw new Error('Empty response from CAPTCHA service');
+      }
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('CAPTCHA response parsing error:', parseError);
+      return res.status(500).json({
+        error: 'CAPTCHA_VERIFICATION_FAILED',
+        code: 'CAPTCHA_VERIFICATION_FAILED',
+        message: 'Failed to verify CAPTCHA. Please try again.'
+      });
+    }
+
+    if (!data || typeof data !== 'object') {
+      console.error('CAPTCHA verification returned invalid data:', data);
+      return res.status(500).json({
+        error: 'CAPTCHA_VERIFICATION_FAILED',
+        code: 'CAPTCHA_VERIFICATION_FAILED',
+        message: 'Failed to verify CAPTCHA. Please try again.'
+      });
+    }
 
     if (!data.success) {
-      console.error('CAPTCHA verification failed:', data['error-codes']);
+      console.error('CAPTCHA verification failed:', data['error-codes'] || data);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:81',message:'captcha verification failed',data:{errorCodes:data['error-codes']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+      // #endregion
       return res.status(400).json({
         error: 'CAPTCHA_INVALID',
         code: 'CAPTCHA_INVALID',
@@ -61,9 +116,15 @@ export const captchaCheck = async (req: Request, res: Response, next: NextFuncti
     }
 
     // CAPTCHA verified successfully
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:90',message:'captcha verified successfully',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
     return next();
   } catch (error) {
     console.error('CAPTCHA verification error:', error);
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'captcha.ts:93',message:'captcha catch block',data:{errorMessage:error instanceof Error?error.message:String(error),errorName:error instanceof Error?error.name:'unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n');}catch(e){}
+    // #endregion
     return res.status(500).json({
       error: 'CAPTCHA_VERIFICATION_FAILED',
       code: 'CAPTCHA_VERIFICATION_FAILED',

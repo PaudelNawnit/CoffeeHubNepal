@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { appendFileSync } from 'fs';
 import { OTP, OTPDocument } from '../models/OTP.js';
 import { User } from '../models/User.js';
 import { sendOTPEmail } from './emailService.js';
@@ -19,11 +20,20 @@ const generateOTP = (): string => {
  * Send OTP for email verification during signup
  */
 export const sendSignupOTP = async (email: string): Promise<{ success: boolean; message: string; expiresIn: number }> => {
+  // #region agent log
+  try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:21',message:'sendSignupOTP entry',data:{email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+  // #endregion
   try {
     const normalizedEmail = email.toLowerCase().trim();
     
     // Check if email is already registered
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:26',message:'checking existing user',data:{normalizedEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+    // #endregion
     const existingUser = await User.findOne({ email: normalizedEmail });
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:27',message:'existing user check result',data:{userExists:!!existingUser},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+    // #endregion
     if (existingUser) {
       throw new Error('EMAIL_IN_USE');
     }
@@ -49,6 +59,9 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
 
     // Save OTP to database
     try {
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:51',message:'creating OTP in database',data:{normalizedEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
       await OTP.create({
         email: normalizedEmail,
         otp,
@@ -58,17 +71,32 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
         verified: false
       });
       console.log(`[OTP Service] OTP created for ${normalizedEmail}`);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:60',message:'OTP created successfully',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
     } catch (dbError: any) {
       console.error('[OTP Service] Database error creating OTP:', dbError);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:62',message:'OTP database error',data:{errorMessage:dbError?.message,errorName:dbError?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
       throw new Error('FAILED_TO_CREATE_OTP');
     }
 
     // Send OTP via email
     try {
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:67',message:'sending OTP email',data:{normalizedEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch(e){}
+      // #endregion
       await sendOTPEmail(normalizedEmail, otp, OTP_EXPIRY_MINUTES);
       console.log(`[OTP Service] Signup OTP sent to ${normalizedEmail}`);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:69',message:'OTP email sent successfully',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch(e){}
+      // #endregion
     } catch (error) {
       console.error('[OTP Service] Email sending error:', error);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:71',message:'OTP email error',data:{errorMessage:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch(e){}
+      // #endregion
       // Delete the OTP if email sending fails
       await OTP.deleteOne({ email: normalizedEmail, purpose: 'signup', otp });
       throw new Error('FAILED_TO_SEND_OTP');
@@ -80,6 +108,9 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
       expiresIn: OTP_EXPIRY_MINUTES * 60
     };
   } catch (error: any) {
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:82',message:'sendSignupOTP outer catch',data:{errorMessage:error?.message,errorType:error?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+    // #endregion
     // Re-throw known errors
     if (error.message === 'EMAIL_IN_USE' || 
         error.message.startsWith('WAIT_') || 

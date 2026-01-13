@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { appendFileSync } from 'fs';
 import { z } from 'zod';
 import { captchaCheck } from '../middleware/captcha.js';
 import { accountRateLimiter, passwordResetRateLimiter } from '../middleware/rateLimit.js';
@@ -56,46 +57,62 @@ router.post(
   captchaCheck,
   validate(sendOTPSchema),
   async (req, res) => {
+    // #region agent log
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'auth.ts:58',message:'send-otp route handler entry',data:{email:req.body?.email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})+'\n');}catch(e){}
+    // #endregion
     const { email } = req.body;
     try {
       console.log('[Auth Route] Sending OTP to:', email);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'auth.ts:61',message:'calling sendSignupOTP',data:{email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
       const result = await sendSignupOTP(email);
       console.log('[Auth Route] OTP sent successfully');
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'auth.ts:63',message:'sendSignupOTP success',data:{success:result.success},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
       return res.json(result);
-    } catch (error) {
-      const err = (error as Error).message;
+    } catch (error: any) {
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'auth.ts:65',message:'send-otp catch block',data:{errorMessage:error?.message,errorType:error?.constructor?.name,headersSent:res.headersSent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
+      const err = error?.message || String(error);
       console.error('[Auth Route] Send OTP error:', error);
       console.error('[Auth Route] Error message:', err);
-      console.error('[Auth Route] Error stack:', (error as Error).stack);
+      console.error('[Auth Route] Error stack:', error?.stack);
+      console.error('[Auth Route] Error type:', error?.constructor?.name);
       
-      if (err === 'EMAIL_IN_USE') {
-        return res.status(409).json({ 
-          error: 'EMAIL_IN_USE', 
-          code: 'EMAIL_IN_USE',
-          message: 'This email is already registered. Please log in instead.'
-        });
-      }
-      if (err.startsWith('WAIT_')) {
-        const seconds = err.replace('WAIT_', '').replace('_SECONDS', '');
-        return res.status(429).json({ 
-          error: 'TOO_MANY_REQUESTS', 
-          code: 'TOO_MANY_REQUESTS',
-          message: `Please wait ${seconds} seconds before requesting another OTP.`,
-          waitTime: parseInt(seconds)
-        });
-      }
-      if (err === 'FAILED_TO_SEND_OTP' || err === 'FAILED_TO_CREATE_OTP') {
+      // Ensure we always send a response
+      if (!res.headersSent) {
+        if (err === 'EMAIL_IN_USE') {
+          return res.status(409).json({ 
+            error: 'EMAIL_IN_USE', 
+            code: 'EMAIL_IN_USE',
+            message: 'This email is already registered. Please log in instead.'
+          });
+        }
+        if (err && typeof err === 'string' && err.startsWith('WAIT_')) {
+          const seconds = err.replace('WAIT_', '').replace('_SECONDS', '');
+          return res.status(429).json({ 
+            error: 'TOO_MANY_REQUESTS', 
+            code: 'TOO_MANY_REQUESTS',
+            message: `Please wait ${seconds} seconds before requesting another OTP.`,
+            waitTime: parseInt(seconds) || 60
+          });
+        }
+        if (err === 'FAILED_TO_SEND_OTP' || err === 'FAILED_TO_CREATE_OTP') {
+          return res.status(500).json({ 
+            error: 'FAILED_TO_SEND_OTP', 
+            code: 'FAILED_TO_SEND_OTP',
+            message: 'Failed to send verification code. Please try again.'
+          });
+        }
         return res.status(500).json({ 
-          error: 'FAILED_TO_SEND_OTP', 
-          code: 'FAILED_TO_SEND_OTP',
-          message: 'Failed to send verification code. Please try again.'
+          error: 'SEND_OTP_FAILED',
+          code: 'SEND_OTP_FAILED',
+          message: err || 'Failed to send verification code. Please try again.'
         });
       }
-      return res.status(500).json({ 
-        error: 'SEND_OTP_FAILED',
-        code: 'SEND_OTP_FAILED',
-        message: err || 'Failed to send verification code. Please try again.'
-      });
     }
   }
 );
