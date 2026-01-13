@@ -107,6 +107,13 @@ router.post(
             message: 'Failed to send verification code. Please try again.'
           });
         }
+        if (err === 'DATABASE_ERROR') {
+          return res.status(500).json({ 
+            error: 'DATABASE_ERROR', 
+            code: 'DATABASE_ERROR',
+            message: 'Database connection error. Please try again later.'
+          });
+        }
         // Log unexpected errors for debugging
         console.error('[Auth Route] Unexpected error type:', {
           errorMessage: err,

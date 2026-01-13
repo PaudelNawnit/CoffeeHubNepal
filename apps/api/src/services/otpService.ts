@@ -30,20 +30,38 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
     // #region agent log
     try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:26',message:'checking existing user',data:{normalizedEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
     // #endregion
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    let existingUser;
+    try {
+      existingUser = await User.findOne({ email: normalizedEmail });
+    } catch (dbError: any) {
+      console.error('[OTP Service] Database error checking existing user:', dbError);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:33',message:'database error checking user',data:{errorMessage:dbError?.message,errorName:dbError?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
+      throw new Error('DATABASE_ERROR');
+    }
     // #region agent log
-    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:27',message:'existing user check result',data:{userExists:!!existingUser},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:37',message:'existing user check result',data:{userExists:!!existingUser},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
     // #endregion
     if (existingUser) {
       throw new Error('EMAIL_IN_USE');
     }
 
     // Check for recent OTP (prevent spam)
-    const recentOTP = await OTP.findOne({
-      email: normalizedEmail,
-      purpose: 'signup',
-      createdAt: { $gt: new Date(Date.now() - RESEND_COOLDOWN_SECONDS * 1000) }
-    });
+    let recentOTP;
+    try {
+      recentOTP = await OTP.findOne({
+        email: normalizedEmail,
+        purpose: 'signup',
+        createdAt: { $gt: new Date(Date.now() - RESEND_COOLDOWN_SECONDS * 1000) }
+      });
+    } catch (dbError: any) {
+      console.error('[OTP Service] Database error checking recent OTP:', dbError);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:48',message:'database error checking recent OTP',data:{errorMessage:dbError?.message,errorName:dbError?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
+      throw new Error('DATABASE_ERROR');
+    }
 
     if (recentOTP) {
       const waitTime = Math.ceil((recentOTP.createdAt.getTime() + RESEND_COOLDOWN_SECONDS * 1000 - Date.now()) / 1000);
@@ -51,7 +69,16 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
     }
 
     // Delete any existing OTPs for this email
-    await OTP.deleteMany({ email: normalizedEmail, purpose: 'signup' });
+    try {
+      await OTP.deleteMany({ email: normalizedEmail, purpose: 'signup' });
+    } catch (dbError: any) {
+      console.error('[OTP Service] Database error deleting existing OTPs:', dbError);
+      // #region agent log
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:58',message:'database error deleting OTPs',data:{errorMessage:dbError?.message,errorName:dbError?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+      // #endregion
+      // Continue anyway - this is not critical
+      console.warn('[OTP Service] Warning: Failed to delete existing OTPs, continuing...');
+    }
 
     // Generate new OTP
     const otp = generateOTP();
@@ -109,17 +136,24 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
     };
   } catch (error: any) {
     // #region agent log
-    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:82',message:'sendSignupOTP outer catch',data:{errorMessage:error?.message,errorType:error?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
+    try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:82',message:'sendSignupOTP outer catch',data:{errorMessage:error?.message,errorType:error?.constructor?.name,errorStack:error?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch(e){}
     // #endregion
     // Re-throw known errors
     if (error.message === 'EMAIL_IN_USE' || 
         error.message.startsWith('WAIT_') || 
         error.message === 'FAILED_TO_SEND_OTP' ||
-        error.message === 'FAILED_TO_CREATE_OTP') {
+        error.message === 'FAILED_TO_CREATE_OTP' ||
+        error.message === 'DATABASE_ERROR') {
       throw error;
     }
     // Wrap unknown errors
     console.error('[OTP Service] Unexpected error in sendSignupOTP:', error);
+    console.error('[OTP Service] Error details:', {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack,
+      constructor: error?.constructor?.name
+    });
     throw new Error(error.message || 'FAILED_TO_SEND_OTP');
   }
 };
