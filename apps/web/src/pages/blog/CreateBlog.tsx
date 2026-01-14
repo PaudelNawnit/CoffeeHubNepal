@@ -98,15 +98,16 @@ export const CreateBlog = () => {
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
     
     for (const file of filesToProcess) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload only image files');
+      // Validate file type - only allow common safe formats
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Only JPG, PNG or WebP images are allowed');
         continue;
       }
 
-      // Validate file size (max 10MB before compression)
-      if (file.size > 10 * 1024 * 1024) {
-        setError('Image size must be less than 10MB');
+      // Validate file size (max 5MB before compression)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
         continue;
       }
 

@@ -12,56 +12,56 @@ import { User } from '../models/User.js';
 
 const router = Router();
 
-const emailSchema = z.string().email();
-const passwordSchema = z
+export const emailSchema = z.string().email().max(254).trim();
+export const passwordSchema = z
   .string()
   .min(8)
   .refine((val) => isPasswordStrong(val), 'Password must contain upper, lower, number');
 
-const signupSchema = z.object({
+export const signupSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  name: z.string().optional(),
+  name: z.string().min(1).max(100).optional(),
   // Only allow regular user roles during signup - admin/moderator must be assigned via admin panel
   role: z.enum(['farmer', 'roaster', 'trader', 'exporter', 'expert']).optional(),
-  phone: z.string().optional(),
-  location: z.string().optional()
+  phone: z.string().max(20).optional(),
+  location: z.string().max(200).optional()
 });
 
-const loginSchema = z.object({
+export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1)
 });
 
-const sendOTPSchema = z.object({
+export const sendOTPSchema = z.object({
   email: emailSchema
 });
 
-const verifyOTPSchema = z.object({
+export const verifyOTPSchema = z.object({
   email: emailSchema,
   otp: z.string().length(6, 'OTP must be 6 digits')
 });
 
-const forgotPasswordSchema = z.object({
+export const forgotPasswordSchema = z.object({
   email: emailSchema
 });
 
-const resetPasswordSchema = z.object({
+export const resetPasswordSchema = z.object({
   token: z.string().min(1),
   password: passwordSchema
 });
 
-const requestSignupLinkSchema = z.object({
+export const requestSignupLinkSchema = z.object({
   email: emailSchema
 });
 
-const completeSignupSchema = z.object({
+export const completeSignupSchema = z.object({
   token: z.string().min(1),
   password: passwordSchema,
-  name: z.string().optional(),
+  name: z.string().min(1).max(100).optional(),
   role: z.enum(['farmer', 'roaster', 'trader', 'exporter', 'expert']).optional(),
-  phone: z.string().optional(),
-  location: z.string().optional(),
+  phone: z.string().max(20).optional(),
+  location: z.string().max(200).optional(),
   email: z.string().email().optional() // Optional - email is extracted from token, but allow it for compatibility
 });
 
@@ -520,7 +520,7 @@ router.post(
 );
 
 // Update profile endpoint
-const updateProfileSchema = z.object({
+export const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   phone: z.string().max(20).optional(),
   location: z.string().max(200).optional(),

@@ -1,4 +1,5 @@
 import cors from 'cors';
+import crypto from 'crypto';
 import express from 'express';
 import helmet from 'helmet';
 import path from 'path';
@@ -74,6 +75,17 @@ export const createApp = () => {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(ipRateLimiter);
 
+  // Attach a per-request ID for traceability and correlation
+  app.use((req, res, next) => {
+    const incomingId = (req.headers['x-request-id'] as string | undefined)?.toString();
+    const requestId = incomingId && incomingId.trim().length > 0 ? incomingId : crypto.randomUUID();
+
+    res.setHeader('X-Request-Id', requestId);
+    (res.locals as any).requestId = requestId;
+
+    next();
+  });
+
   // Add caching headers for GET requests (public data only)
   app.use((req, res, next) => {
     // Only cache GET requests for public data - NOT admin endpoints
@@ -122,26 +134,41 @@ export const createApp = () => {
     });
   }
 
-  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
     // Don't send error response if headers already sent (CORS might have already responded)
     if (res.headersSent) {
       return _next(err);
     }
     
     // Handle CORS errors specifically
+    const requestId = (res.locals as any)?.requestId;
+
     if (err.message === 'Not allowed by CORS') {
-      console.error('[CORS] CORS error:', err.message);
+      console.error('[CORS] CORS error:', {
+        message: err.message,
+        path: req.path,
+        method: req.method,
+        requestId
+      });
       return res.status(403).json({ 
         error: 'CORS_ERROR',
         message: 'Not allowed by CORS'
       });
     }
     
-    console.error('Unhandled error:', err);
-    console.error('Error stack:', err.stack);
+    console.error('Unhandled error', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+      path: req.path,
+      method: req.method,
+      requestId
+    });
+
     res.status(500).json({ 
       error: 'INTERNAL_ERROR',
-      message: process.env.NODE_ENV === 'development' ? err.message : 'An internal server error occurred'
+      message: 'An internal server error occurred',
+      requestId
     });
   });
 

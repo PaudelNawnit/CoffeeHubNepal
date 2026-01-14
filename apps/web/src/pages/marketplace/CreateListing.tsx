@@ -41,15 +41,16 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
       return;
     }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload only image files');
+    // Validate file type - only allow safe image formats
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only JPG, PNG or WebP images are allowed');
       return;
     }
 
-    // Validate file size (max 10MB before compression)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image size must be less than 10MB');
+    // Validate file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
       return;
     }
 

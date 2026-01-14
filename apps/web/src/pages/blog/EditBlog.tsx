@@ -398,13 +398,13 @@ export const EditBlog = ({ postId, onBack }: EditBlogProps) => {
                   <p className="text-sm font-bold text-gray-700 mb-1">
                     {isDragging ? 'Drop images here' : 'Drag and drop images here'}
                   </p>
-                  <p className="text-xs text-gray-500 mb-4">
-                    or click to browse (Max 5MB per image)
-                  </p>
+              <p className="text-xs text-gray-500 mb-4">
+                or click to browse (Max 5MB per image)
+              </p>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                     multiple
                     onChange={handleFileInputChange}
                     className="hidden"

@@ -23,11 +23,32 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFormData({
-        ...formData,
-        documents: [...formData.documents, ...Array.from(e.target.files)]
-      });
+    const files = e.target.files;
+    if (files) {
+      const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+      const validFiles: File[] = [];
+      for (const file of Array.from(files)) {
+        if (file.size > maxSizeBytes) {
+          // Skip oversized files
+          // You could replace this with a toast or inline error UI if desired
+          console.warn(`Skipping file ${file.name}: larger than 5MB`);
+          continue;
+        }
+        if (!allowedTypes.includes(file.type)) {
+          console.warn(`Skipping file ${file.name}: unsupported type ${file.type}`);
+          continue;
+        }
+        validFiles.push(file);
+      }
+
+      if (validFiles.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          documents: [...prev.documents, ...validFiles]
+        }));
+      }
     }
     // Reset input so same file can be selected again
     if (fileInputRef.current) {
@@ -157,7 +178,7 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/*,.pdf"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleFileUpload}
                   className="hidden"
                 />
