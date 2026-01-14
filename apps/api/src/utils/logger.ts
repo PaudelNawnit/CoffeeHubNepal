@@ -44,7 +44,7 @@ const consoleFormat = winston.format.combine(
 );
 
 // Define transports
-const transports = [
+const transports: winston.transport[] = [
   // Write all logs to `combined.log`
   new winston.transports.File({
     filename: path.join(__dirname, '../../logs/combined.log'),
