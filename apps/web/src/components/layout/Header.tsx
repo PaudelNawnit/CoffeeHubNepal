@@ -1,6 +1,6 @@
 import { useApp } from '@/context/AppContext';
 import { Icon } from '@/components/common/Icon';
-import logoImage from '@/assets/images/logo/coffeelogo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.webp';
 
 export const Header = () => {
   const { setCurrentPage, language, setLanguage } = useApp();

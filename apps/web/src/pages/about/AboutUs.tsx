@@ -3,19 +3,19 @@ import { Card } from '@/components/common/Card';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { t } from '@/i18n';
-import logoImage from '@/assets/images/logo/coffeelogo.png';
-import surajNepalImage from '@/assets/images/team/SurajNepal.png';
-import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.png';
-import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.jpeg';
-import KrrishNyopaneImage from '@/assets/images/team/KrrishNyoupane.png';
-import SachinJhaImage from '@/assets/images/team/SachinJha.png';
-import MukeshPandeyImage from '@/assets/images/team/MukeshPandey.png';
-import NawnitPoudelImage from '@/assets/images/team/NawnitPaudel.png';
-import SupriyaKhadkaImage from '@/assets/images/team/SupriyaKhadka.png';
-import RajdipJoshiImage from '@/assets/images/team/RajdipJoshi.png';
-import AasthaGaireImage from '@/assets/images/team/AasthaGaire.png';
-import PradipKhanalImage from '@/assets/images/team/PradipKhanal.png';
-import AdityaManShresthaImage from '@/assets/images/team/AdityaManShrestha.png';
+import logoImage from '@/assets/images/logo/coffeelogo.webp';
+import surajNepalImage from '@/assets/images/team/SurajNepal.webp';
+import SarthakBhattaraiImage from '@/assets/images/team/SarthakBhattarai.webp';
+import SiddhantGiriImage from '@/assets/images/team/SiddhantGiri.webp';
+import KrrishNyopaneImage from '@/assets/images/team/KrrishNyoupane.webp';
+import SachinJhaImage from '@/assets/images/team/SachinJha.webp';
+import MukeshPandeyImage from '@/assets/images/team/MukeshPandey.webp';
+import NawnitPoudelImage from '@/assets/images/team/NawnitPaudel.webp';
+import SupriyaKhadkaImage from '@/assets/images/team/SupriyaKhadka.webp';
+import RajdipJoshiImage from '@/assets/images/team/RajdipJoshi.webp';
+import AasthaGaireImage from '@/assets/images/team/AasthaGaire.webp';
+import PradipKhanalImage from '@/assets/images/team/PradipKhanal.webp';
+import AdityaManShresthaImage from '@/assets/images/team/AdityaManShrestha.webp';
 
 const TEAM_MEMBERS = [
   { name: "Suraj Nepal", role: "Backend Developer", image: surajNepalImage },

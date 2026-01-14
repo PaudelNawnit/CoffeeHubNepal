@@ -6,6 +6,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
 import { ipRateLimiter } from './middleware/rateLimit.js';
+import { sanitizeInput, sanitizeQuery } from './middleware/sanitize.js';
+import { setupSwagger } from './middleware/swagger.js';
+import { logger } from './utils/logger.js';
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
 import adminRoutes from './routes/admin.js';
@@ -20,10 +23,43 @@ const __dirname = path.dirname(__filename);
 export const createApp = () => {
   const app = express();
   
-  // Configure helmet for production (less strict for static file serving)
+  // Configure helmet for security headers
   app.use(helmet({
-    contentSecurityPolicy: false, // Allow inline scripts/styles from React build
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow inline scripts for React
+        imgSrc: ["'self'", "data:", "https:"], // Allow data URIs for base64 images
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Disable for compatibility
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resources
   }));
+  
+  // Additional security headers
+  app.use((req, res, next) => {
+    // X-Content-Type-Options: Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // X-Frame-Options: Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    // X-XSS-Protection: Enable XSS filter (legacy browsers)
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Strict-Transport-Security: Force HTTPS (only in production)
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    // Referrer-Policy: Control referrer information
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Permissions-Policy: Restrict browser features
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    next();
+  });
   
   // CORS configuration
   const isProduction = process.env.NODE_ENV === 'production';
@@ -117,6 +153,12 @@ export const createApp = () => {
   app.use('/contacts', contactRoutes);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  
+  // Swagger API documentation (only in development or if enabled)
+  if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+    setupSwagger(app);
+    logger.info('Swagger documentation available at /api-docs');
+  }
 
   // Serve static files from React build (only in production when SERVE_STATIC_FILES is true)
   if (staticFilesServed) {
@@ -144,19 +186,19 @@ export const createApp = () => {
     const requestId = (res.locals as any)?.requestId;
 
     if (err.message === 'Not allowed by CORS') {
-      console.error('[CORS] CORS error:', {
-        message: err.message,
-        path: req.path,
-        method: req.method,
-        requestId
-      });
+    logger.error('CORS error', {
+      message: err.message,
+      path: req.path,
+      method: req.method,
+      requestId
+    });
       return res.status(403).json({ 
         error: 'CORS_ERROR',
         message: 'Not allowed by CORS'
       });
     }
     
-    console.error('Unhandled error', {
+    logger.error('Unhandled error', {
       name: err.name,
       message: err.message,
       stack: err.stack,

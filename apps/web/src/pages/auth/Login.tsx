@@ -8,7 +8,7 @@ import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { t } from '@/i18n';
-import logoImage from '@/assets/images/logo/coffeelogo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.webp';
 
 interface LoginProps {
   onBack?: () => void;

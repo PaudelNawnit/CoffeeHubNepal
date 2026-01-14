@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { validateObjectId } from '../middleware/validateObjectId.js';
+import { logger } from '../utils/logger.js';
 import {
   createPost,
   getPosts,
@@ -50,7 +51,7 @@ router.get('/', async (req, res) => {
     const result = await getPosts({ category, tags, author, page, limit });
     return res.json(result);
   } catch (error) {
-    console.error('Get posts error:', error);
+    logger.error('Get posts error', { error, path: req.path });
     return res.status(500).json({ error: 'FAILED_TO_FETCH_POSTS' });
   }
 });
@@ -89,12 +90,12 @@ router.post('/', authenticate, validate(createPostSchema), async (req: AuthReque
     
     return res.status(201).json(post);
   } catch (error: any) {
-    console.error('Create post error:', error);
-    console.error('Error details:', {
+    logger.error('Create post error', {
       message: error.message,
       name: error.name,
       code: error.code,
-      stack: error.stack
+      stack: error.stack,
+      userId: req.userId
     });
     
     // MongoDB/Cosmos DB specific errors

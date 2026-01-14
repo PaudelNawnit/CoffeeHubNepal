@@ -106,6 +106,8 @@ productSchema.index({ category: 1, active: 1, createdAt: -1 });
 productSchema.index({ location: 1, category: 1 });
 productSchema.index({ sellerId: 1, createdAt: -1 });
 productSchema.index({ active: 1, sold: 1, createdAt: -1 });
+// Compound index for location + category + active + price (recommended in suggestions)
+productSchema.index({ location: 1, category: 1, active: 1, price: 1 });
 
 export const Product = mongoose.model<ProductDocument>('Product', productSchema);
 

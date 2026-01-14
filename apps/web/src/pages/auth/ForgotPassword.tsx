@@ -6,7 +6,7 @@ import { Card } from '@/components/common/Card';
 import { LoadingOverlay } from '@/components/common/LoadingOverlay';
 import { useApp } from '@/context/AppContext';
 import { authService } from '@/services/auth.service';
-import logoImage from '@/assets/images/logo/coffeelogo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.webp';
 
 interface ForgotPasswordProps {
   onBack?: () => void;

@@ -94,6 +94,8 @@ blogPostSchema.index({ category: 1, createdAt: -1 });
 blogPostSchema.index({ tags: 1 });
 blogPostSchema.index({ published: 1, createdAt: -1 }); // Compound index for common query
 blogPostSchema.index({ author: 1, createdAt: -1 }); // For author-specific queries
+// Compound index for category + tags + createdAt (recommended in suggestions)
+blogPostSchema.index({ category: 1, tags: 1, createdAt: -1 });
 
 export const BlogPost = mongoose.model<BlogPostDocument>('BlogPost', blogPostSchema);
 

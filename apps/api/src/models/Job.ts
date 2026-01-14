@@ -77,6 +77,8 @@ const jobSchema = new Schema<JobDocument>(
 jobSchema.index({ createdAt: -1 });
 jobSchema.index({ location: 1, type: 1 });
 jobSchema.index({ active: 1, createdAt: -1 });
+// Compound index for location + role (type) + active + createdAt (recommended in suggestions)
+jobSchema.index({ location: 1, type: 1, active: 1, createdAt: -1 });
 
 export const Job = mongoose.model<JobDocument>('Job', jobSchema);
 

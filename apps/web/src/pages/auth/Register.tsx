@@ -8,7 +8,7 @@ import { LoadingOverlay } from '@/components/common/LoadingOverlay';
 // import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
 import { authService } from '@/services/auth.service';
-import logoImage from '@/assets/images/logo/coffeelogo.png';
+import logoImage from '@/assets/images/logo/coffeelogo.webp';
 
 interface RegisterProps {
   onBack?: () => void;
