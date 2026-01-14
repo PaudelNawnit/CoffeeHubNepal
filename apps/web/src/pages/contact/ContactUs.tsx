@@ -2,6 +2,7 @@ import { ArrowLeft, Mail, Phone, MapPin, Send, MessageCircle, Clock, CheckCircle
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { Textarea } from '@/components/common/Textarea';
 import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -162,6 +163,7 @@ export const ContactUs = () => {
                 placeholder={t(language, 'contact.namePlaceholder')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                maxLength={100}
                 required
               />
               <Input
@@ -181,6 +183,7 @@ export const ContactUs = () => {
                 placeholder={t(language, 'contact.phonePlaceholder')}
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                maxLength={20}
               />
               <Input
                 type="text"
@@ -188,22 +191,20 @@ export const ContactUs = () => {
                 placeholder={t(language, 'contact.subjectPlaceholder')}
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                maxLength={200}
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
-                {t(language, 'contact.message')}
-              </label>
-              <textarea
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                placeholder={t(language, 'contact.messagePlaceholder')}
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[150px]"
-                required
-              />
-            </div>
+            <Textarea
+              label={t(language, 'contact.message')}
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              placeholder={t(language, 'contact.messagePlaceholder')}
+              className="min-h-[150px]"
+              maxLength={5000}
+              required
+            />
 
             {/* CAPTCHA */}
             <div className="space-y-2">

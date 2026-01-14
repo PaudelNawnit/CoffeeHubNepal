@@ -22,6 +22,8 @@ export type CompleteSignupData = Omit<RegisterData, 'email'> & {
   email?: string;
 };
 
+const coerceBoolean = (value: unknown): boolean => value === true || value === 'true';
+
 interface ApiError {
   error: string;
   code?: string;
@@ -124,7 +126,7 @@ export const authService = {
         phone: data.user.phone || '',
         location: data.user.location || '',
         avatar: data.user.avatar || '',
-        verified: data.user.verified || false,
+        verified: coerceBoolean(data.user.verified),
         memberSince: new Date().getFullYear().toString()
       };
       
@@ -242,7 +244,7 @@ export const authService = {
         location: result.user.location || data.location || '',
         avatar: result.user.avatar || '',
         role: (result.user.role || data.role || 'farmer') as 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert' | 'admin' | 'moderator',
-        verified: result.user.verified || false,
+        verified: coerceBoolean(result.user.verified),
         memberSince: new Date().getFullYear().toString()
       };
       
@@ -476,7 +478,7 @@ export const authService = {
         location: result.user.location || data.location || '',
         avatar: result.user.avatar || '',
         role: (result.user.role || data.role || 'farmer') as 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert' | 'admin' | 'moderator', // Use role from backend or registration
-        verified: result.user.verified || false,
+        verified: coerceBoolean(result.user.verified),
         memberSince: new Date().getFullYear().toString()
       };
       
@@ -521,7 +523,11 @@ export const authService = {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        return JSON.parse(userStr);
+        const parsed = JSON.parse(userStr);
+        if (parsed && typeof parsed === 'object' && 'verified' in parsed) {
+          (parsed as any).verified = coerceBoolean((parsed as any).verified);
+        }
+        return parsed;
       } catch {
         return null;
       }

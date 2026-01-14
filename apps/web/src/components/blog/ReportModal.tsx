@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/common/Button';
+import { Textarea } from '@/components/common/Textarea';
 import { reportService, ReportType } from '@/services/report.service';
 
 interface ReportModalProps {
@@ -97,12 +98,13 @@ export const ReportModal = ({ isOpen, onClose, postId, postTitle, onSuccess }: R
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Reason
               </label>
-              <textarea
+              <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Please describe why you're reporting this post..."
                 rows={4}
-                className="w-full px-4 py-2 border border-[#EBE3D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6F4E37] resize-none"
+                className="resize-none px-4 py-2"
+                maxLength={500}
                 required
               />
             </div>

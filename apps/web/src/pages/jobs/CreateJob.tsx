@@ -3,6 +3,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
+import { Textarea } from '@/components/common/Textarea';
 import { useAuth } from '@/context/AuthContext';
 import { jobService } from '@/services/job.service';
 import { useApp } from '@/context/AppContext';
@@ -80,6 +81,7 @@ export const CreateJob = ({ onBack, onSubmit }: CreateJobProps) => {
               placeholder="e.g. Seasonal Berry Pickers"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={200}
               required
             />
 
@@ -90,6 +92,7 @@ export const CreateJob = ({ onBack, onSubmit }: CreateJobProps) => {
                 placeholder="Everest Coffee Estate"
                 value={formData.farm}
                 onChange={(e) => setFormData({ ...formData, farm: e.target.value })}
+                maxLength={200}
                 required
               />
 
@@ -116,6 +119,7 @@ export const CreateJob = ({ onBack, onSubmit }: CreateJobProps) => {
                 placeholder="Kaski, Nepal"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                maxLength={200}
                 required
               />
 
@@ -125,46 +129,38 @@ export const CreateJob = ({ onBack, onSubmit }: CreateJobProps) => {
                 placeholder="Rs. 800/day"
                 value={formData.pay}
                 onChange={(e) => setFormData({ ...formData, pay: e.target.value })}
+                maxLength={200}
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
-                Job Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe the job role and responsibilities..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[120px]"
-                required
-              />
-            </div>
+            <Textarea
+              label="Job Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Describe the job role and responsibilities..."
+              className="min-h-[120px]"
+              maxLength={3000}
+              required
+            />
 
-            <div>
-              <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
-                Requirements
-              </label>
-              <textarea
-                value={formData.requirements}
-                onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                placeholder="List the required qualifications and skills..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[100px]"
-              />
-            </div>
+            <Textarea
+              label="Requirements"
+              value={formData.requirements}
+              onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+              placeholder="List the required qualifications and skills..."
+              className="min-h-[100px]"
+              maxLength={2000}
+            />
 
-            <div>
-              <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
-                Benefits
-              </label>
-              <textarea
-                value={formData.benefits}
-                onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                placeholder="List any benefits or perks..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[100px]"
-              />
-            </div>
+            <Textarea
+              label="Benefits"
+              value={formData.benefits}
+              onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+              placeholder="List any benefits or perks..."
+              className="min-h-[100px]"
+              maxLength={2000}
+            />
 
             <div className="flex gap-3">
               <Button variant="outline" type="button" onClick={onBack} className="flex-1">

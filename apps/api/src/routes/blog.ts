@@ -19,7 +19,7 @@ const router = Router();
 
 const createPostSchema = z.object({
   title: z.string().min(1).max(200),
-  content: z.string().min(1),
+  content: z.string().min(1).max(5000),
   category: z.string().min(1),
   tags: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
@@ -28,7 +28,7 @@ const createPostSchema = z.object({
 
 const updatePostSchema = z.object({
   title: z.string().min(1).max(200).optional(),
-  content: z.string().min(1).optional(),
+  content: z.string().min(1).max(5000).optional(),
   category: z.string().min(1).optional(),
   tags: z.array(z.string()).optional(),
   images: z.array(z.string().url()).optional()
@@ -229,7 +229,7 @@ router.delete('/:id/comments/:commentId', validateObjectId(['id', 'commentId']),
 
 // Report a post (authenticated users)
 const reportPostSchema = z.object({
-  reason: z.string().min(1),
+  reason: z.string().min(1).max(500),
   type: z.enum(['spam', 'inappropriate', 'fraud', 'harassment', 'other'])
 });
 

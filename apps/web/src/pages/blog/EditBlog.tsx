@@ -3,6 +3,7 @@ import { ArrowLeft, Image as ImageIcon, X, Upload, Link as LinkIcon } from 'luci
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
+import { Textarea } from '@/components/common/Textarea';
 import { blogService, BlogPost } from '@/services/blog.service';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -271,7 +272,6 @@ export const EditBlog = ({ postId, onBack }: EditBlogProps) => {
                 maxLength={200}
                 required
               />
-              <p className="text-xs text-gray-400 mt-1">{title.length}/200</p>
             </div>
 
             <div>
@@ -294,11 +294,12 @@ export const EditBlog = ({ postId, onBack }: EditBlogProps) => {
               <label className="block text-sm font-black text-gray-700 mb-2">
                 Content *
               </label>
-              <textarea
+              <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your blog post content here..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[300px]"
+                className="min-h-[300px]"
+                maxLength={5000}
                 required
               />
             </div>

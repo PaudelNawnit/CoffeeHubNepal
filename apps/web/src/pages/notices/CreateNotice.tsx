@@ -3,6 +3,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
+import { Textarea } from '@/components/common/Textarea';
 
 interface CreateNoticeProps {
   onBack: () => void;
@@ -46,6 +47,7 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
               placeholder="e.g. Monsoon Harvest Training"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={200}
               required
             />
 
@@ -87,6 +89,7 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
               placeholder="e.g. Kaski, Nepal"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              maxLength={200}
             />
 
             <Input
@@ -96,18 +99,15 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
               onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
             />
 
-            <div>
-              <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
-                Notice Content
-              </label>
-              <textarea
-                value={formData.body}
-                onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                placeholder="Write your notice details here..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[200px]"
-                required
-              />
-            </div>
+            <Textarea
+              label="Notice Content"
+              value={formData.body}
+              onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+              placeholder="Write your notice details here..."
+              className="min-h-[200px]"
+              maxLength={2000}
+              required
+            />
 
             <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-2xl">
               <p className="text-xs text-yellow-800">

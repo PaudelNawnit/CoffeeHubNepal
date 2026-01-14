@@ -10,7 +10,7 @@ export const DesktopHeader = () => {
   // Get user display name and role
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   const userRole = user?.role || 'farmer';
-  const isVerified = user?.verified || false;
+  const isVerified = user?.verified === true;
   
   // Get avatar URL - use user's uploaded avatar or fallback to generated avatar
   const avatarSeed = user?.email || user?.name || 'user';

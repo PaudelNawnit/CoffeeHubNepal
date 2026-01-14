@@ -1,4 +1,4 @@
-import { InputHTMLAttributes } from 'react';
+import { TextareaHTMLAttributes } from 'react';
 
 type LimitVariant = 'name' | 'short' | 'description' | 'email';
 
@@ -9,7 +9,7 @@ const DEFAULT_LIMITS: Record<LimitVariant, number> = {
   email: 254
 };
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   /**
@@ -24,25 +24,16 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   showCounter?: boolean;
 }
 
-export const Input = ({
+export const Textarea = ({
   label,
   error,
   className = '',
-  limitVariant,
+  limitVariant = 'description',
   showCounter = true,
   ...props
-}: InputProps) => {
-  // Determine enforced max length
-  const inferredVariant: LimitVariant | undefined =
-    limitVariant ??
-    (props.type === 'email' ? 'email' : undefined);
-
+}: TextareaProps) => {
   const effectiveMaxLength =
-    typeof props.maxLength === 'number'
-      ? props.maxLength
-      : inferredVariant
-        ? DEFAULT_LIMITS[inferredVariant]
-        : undefined;
+    typeof props.maxLength === 'number' ? props.maxLength : DEFAULT_LIMITS[limitVariant];
 
   const currentValue =
     typeof props.value === 'string' ? props.value : props.value != null ? String(props.value) : '';
@@ -57,7 +48,7 @@ export const Input = ({
           {label}
         </label>
       )}
-      <input
+      <textarea
         className={`w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm ${error ? 'border-red-300' : ''} ${className}`}
         {...props}
         maxLength={effectiveMaxLength}

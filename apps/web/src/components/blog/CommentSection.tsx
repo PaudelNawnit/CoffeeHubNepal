@@ -56,6 +56,7 @@ export const CommentSection = ({
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             disabled={isSubmitting}
+            maxLength={1000}
           />
           <Button
             type="submit"

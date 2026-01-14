@@ -3,6 +3,7 @@ import { ArrowLeft, Camera, X, Upload } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
+import { Textarea } from '@/components/common/Textarea';
 import { compressImage } from '@/utils/imageCompression';
 import { marketplaceService } from '@/services/marketplace.service';
 import { useAuth } from '@/context/AuthContext';
@@ -312,6 +313,7 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
               placeholder="e.g. A-Grade Parchment Coffee"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={200}
               required
             />
 
@@ -384,11 +386,12 @@ export const CreateListing = ({ onBack, onSubmit }: CreateListingProps) => {
               <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
                 Description
               </label>
-              <textarea
+              <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe your product in detail..."
-                className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm min-h-[120px]"
+                className="min-h-[120px]"
+                maxLength={3000}
                 required
               />
             </div>

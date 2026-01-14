@@ -18,13 +18,13 @@ const router = Router();
 
 const createJobSchema = z.object({
   title: z.string().min(1).max(200),
-  farm: z.string().min(1),
-  location: z.string().min(1),
-  pay: z.string().min(1),
+  farm: z.string().min(1).max(200),
+  location: z.string().min(1).max(200),
+  pay: z.string().min(1).max(200),
   type: z.enum(['Full-time', 'Part-time', 'Seasonal', 'Contract']),
-  description: z.string().min(1),
-  requirements: z.string().optional(),
-  benefits: z.string().optional()
+  description: z.string().min(1).max(3000),
+  requirements: z.string().max(2000).optional(),
+  benefits: z.string().max(2000).optional()
 });
 
 const createApplicationSchema = z.object({

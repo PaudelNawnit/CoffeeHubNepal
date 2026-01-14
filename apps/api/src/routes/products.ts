@@ -16,7 +16,7 @@ const router = Router();
 
 const createProductSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().min(1),
+  description: z.string().min(1).max(3000),
   price: z.number().min(0),
   unit: z.string().min(1),
   quantity: z.number().min(0),

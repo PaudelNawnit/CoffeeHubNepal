@@ -67,7 +67,7 @@ export const Profile = () => {
   const memberSince = user?.memberSince || new Date().getFullYear().toString();
   
   // Verification status
-  const isVerified = user?.verified || false;
+  const isVerified = user?.verified === true;
 
   // Fetch user statistics
   useEffect(() => {
