@@ -629,5 +629,36 @@ router.put(
   }
 );
 
+// Get current authenticated user (for keeping frontend session in sync)
+router.get('/me', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'UNAUTHORIZED', message: 'User not authenticated' });
+    }
+
+    const user = await User.findById(userId).select('-passwordHash -failedLogins -lockUntil');
+    if (!user) {
+      return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'User not found' });
+    }
+
+    return res.json({
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phone: user.phone,
+        location: user.location,
+        avatar: user.avatar,
+        verified: user.verified
+      }
+    });
+  } catch (error: any) {
+    console.error('Get current user error:', error);
+    return res.status(500).json({ error: 'FAILED_TO_FETCH_USER', message: 'Failed to fetch user' });
+  }
+});
+
 export default router;
 

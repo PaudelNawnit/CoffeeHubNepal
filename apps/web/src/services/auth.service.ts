@@ -50,6 +50,29 @@ interface VerificationLinkResponse {
 }
 
 export const authService = {
+  async fetchMe() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      // If token is invalid/expired, behave like logged out
+      if (response.status === 401 || response.status === 403) {
+        return null;
+      }
+      throw new Error('Failed to fetch current user');
+    }
+
+    const data = await response.json();
+    return data?.user ?? null;
+  },
+
   async login(credentials: LoginCredentials, captchaToken?: string) {
     try {
       const headers: HeadersInit = {

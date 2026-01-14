@@ -37,18 +37,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const currentUser = authService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser as User);
+          // Use saved user immediately (fast UI), then refresh from server
+          const cachedUser = authService.getCurrentUser();
+          if (cachedUser) {
+            setUser(cachedUser as User);
+          }
+
+          // Refresh from server so changes like "verified" are reflected without re-login
+          const freshUser = await authService.fetchMe();
+          if (freshUser) {
+            const updatedUser = {
+              ...(cachedUser || {}),
+              ...freshUser
+            };
+            setUser(updatedUser as User);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
           } else {
-            // Token exists but user data is invalid, clear it
+            // Token exists but is invalid/expired, clear it
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            setUser(null);
           }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
