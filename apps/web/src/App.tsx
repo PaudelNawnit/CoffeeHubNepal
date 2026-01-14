@@ -246,7 +246,10 @@ const AppContent = () => {
         if (postId) return <EditBlog postId={postId} onBack={handleBack} />;
       }
       if (subPage === 'create-listing') return <CreateListing onBack={handleBack} />;
-      if (subPage === 'notice-detail' && selectedId) return <NoticeDetail noticeId={selectedId} onBack={handleBack} />;
+      if (subPage === 'notice-detail') {
+        const noticeId = sessionStorage.getItem('noticeDetailId') || (selectedId ? selectedId.toString() : '');
+        if (noticeId) return <NoticeDetail noticeId={noticeId} onBack={handleBack} />;
+      }
       if (subPage === 'create-notice') return <CreateNotice onBack={handleBack} />;
       if (subPage === 'job-detail') {
         const jobId = sessionStorage.getItem('jobDetailId') || (selectedId ? selectedId.toString() : '');

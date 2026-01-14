@@ -4,6 +4,8 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { Textarea } from '@/components/common/Textarea';
+import { noticeService } from '@/services/notice.service';
+import { useAuth } from '@/context/AuthContext';
 
 interface CreateNoticeProps {
   onBack: () => void;
@@ -11,6 +13,7 @@ interface CreateNoticeProps {
 }
 
 export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     body: '',
@@ -19,14 +22,33 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
     location: '',
     deadline: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const noticeTypes = ['Training', 'Govt', 'Event', 'Alert', 'Other'];
   const priorities = ['High', 'Medium', 'Low'];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
-    onBack();
+
+    if (!isAuthenticated || !user || (user.role !== 'admin' && user.role !== 'moderator')) {
+      setError('Only admins and moderators can post official alerts.');
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const created = await noticeService.createNotice(formData);
+      onSubmit?.(created);
+      onBack();
+    } catch (err: any) {
+      console.error('Failed to create notice:', err);
+      setError(err?.message || 'Failed to create notice. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -41,6 +63,19 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
       <div className="p-6">
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {(!isAuthenticated || !user || (user.role !== 'admin' && user.role !== 'moderator')) && (
+              <div className="bg-red-50 border border-red-100 p-3 rounded-2xl text-xs text-red-700">
+                <strong className="font-black">Access restricted:</strong> Only admins and
+                moderators can post official alerts.
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 p-3 rounded-2xl text-xs text-red-700">
+                {error}
+              </div>
+            )}
+
             <Input
               type="text"
               label="Notice Title"
@@ -112,7 +147,7 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
             <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-2xl">
               <p className="text-xs text-yellow-800">
                 <strong className="font-black">Note:</strong> Notices are subject to moderation. 
-                Only verified users can post official notices.
+                Only admin and moderator accounts can post official alerts.
               </p>
             </div>
 
@@ -120,8 +155,19 @@ export const CreateNotice = ({ onBack, onSubmit }: CreateNoticeProps) => {
               <Button variant="outline" type="button" onClick={onBack} className="flex-1">
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" className="flex-1">
-                <Send size={16} /> Post Notice
+              <Button
+                variant="primary"
+                type="submit"
+                className="flex-1"
+                disabled={
+                  isSubmitting ||
+                  !isAuthenticated ||
+                  !user ||
+                  (user.role !== 'admin' && user.role !== 'moderator')
+                }
+              >
+                <Send size={16} />
+                {isSubmitting ? 'Posting...' : 'Post Notice'}
               </Button>
             </div>
           </form>

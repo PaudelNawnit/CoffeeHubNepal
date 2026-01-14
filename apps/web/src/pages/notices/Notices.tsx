@@ -1,14 +1,39 @@
+import { useEffect, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { NoticeCard } from '@/components/cards/NoticeCard';
-import { MOCK_NOTICES } from '@/utils/mockData';
 import { useApp } from '@/context/AppContext';
+import { noticeService, type Notice } from '@/services/notice.service';
 
 export const Notices = () => {
   const { navigate } = useApp();
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadNotices = async () => {
+      try {
+        const data = await noticeService.getNotices();
+        setNotices(data);
+      } catch (error) {
+        console.error('Failed to load notices:', error);
+        setNotices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNotices();
+  }, []);
   
-  const handleNoticeClick = (id: number) => {
-    navigate('notice-detail', id);
+  const handleNoticeClick = (id: string) => {
+    // Store underlying blog post ID and use subPage navigation (similar to blog detail)
+    try {
+      window.sessionStorage.setItem('noticeDetailId', id);
+    } catch {
+      // ignore storage errors
+    }
+    navigate('notice-detail', 0);
   };
 
   return (
@@ -20,9 +45,19 @@ export const Notices = () => {
         </Button>
       </div>
       <div className="space-y-4">
-        {MOCK_NOTICES.map(notice => (
-          <NoticeCard key={notice.id} notice={notice} onReadMore={() => handleNoticeClick(notice.id)} />
-        ))}
+        {loading ? (
+          <p className="text-sm text-gray-500">Loading alerts...</p>
+        ) : notices.length === 0 ? (
+          <p className="text-sm text-gray-500">No official alerts have been posted yet.</p>
+        ) : (
+          notices.map(notice => (
+            <NoticeCard
+              key={notice.id}
+              notice={notice}
+              onReadMore={() => handleNoticeClick(notice.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );

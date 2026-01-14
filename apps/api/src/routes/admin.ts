@@ -23,6 +23,7 @@ import {
 } from '../services/reportService.js';
 import { User, UserRole } from '../models/User.js';
 import { ReportStatus, ReportType } from '../models/Report.js';
+import { createPost } from '../services/blogService.js';
 
 const router = Router();
 
@@ -305,6 +306,73 @@ router.get('/reports/post/:postId', validateObjectId(['postId']), requireAdminOr
     return res.status(500).json({ error: 'FAILED_TO_FETCH_REPORTS' });
   }
 });
+
+// Create an official notice (admin/moderator only). Notices are stored in the BlogPost collection.
+const createNoticeSchema = z.object({
+  title: z.string().min(1).max(200),
+  body: z.string().min(1).max(2000),
+  type: z.enum(['Training', 'Govt', 'Event', 'Alert', 'Other']).optional(),
+  priority: z.enum(['High', 'Medium', 'Low']).optional(),
+  location: z.string().max(200).optional(),
+  deadline: z.string().max(100).optional()
+});
+
+router.post(
+  '/notices',
+  requireAdminOrModerator,
+  validate(createNoticeSchema),
+  async (req: AuthRequest, res) => {
+    try {
+      if (!req.userId) {
+        return res.status(401).json({ error: 'UNAUTHORIZED', message: 'User not authenticated' });
+      }
+
+      const { title, body, type, priority, location, deadline } = req.body as z.infer<
+        typeof createNoticeSchema
+      >;
+
+      const author = await User.findById(req.userId).lean();
+      if (!author) {
+        return res.status(401).json({ error: 'USER_NOT_FOUND', message: 'Author not found' });
+      }
+
+      // Encode notice metadata in tags so we can later filter via /blog endpoint
+      const tags: string[] = ['notice'];
+      if (type) tags.push(`type:${type}`);
+      if (priority) tags.push(`priority:${priority}`);
+      if (location) tags.push(`location:${location}`);
+      if (deadline) tags.push(`deadline:${deadline}`);
+
+      const post = await createPost(req.userId, {
+        title,
+        content: body,
+        category: 'notice',
+        tags,
+        images: [],
+        authorName: author.name || 'Admin',
+        authorEmail: author.email
+      });
+
+      return res.status(201).json({
+        id: post._id.toString(),
+        title: post.title,
+        body: post.content,
+        createdAt: post.createdAt,
+        date: post.createdAt,
+        type: type || 'Alert',
+        priority: (priority || 'Medium') as 'High' | 'Medium' | 'Low',
+        location: location || undefined,
+        deadline: deadline || undefined
+      });
+    } catch (error) {
+      console.error('Create notice error:', error);
+      return res.status(500).json({
+        error: 'FAILED_TO_CREATE_NOTICE',
+        message: (error as Error).message || 'Unknown error occurred'
+      });
+    }
+  }
+);
 
 export default router;
 
