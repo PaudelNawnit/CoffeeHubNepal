@@ -68,7 +68,11 @@ export const completeSignup = async (
     role: userRole,
     phone: phone || undefined,
     location: location || undefined,
-    verified: true // Email is verified via the link
+    // IMPORTANT:
+    // - Email is verified by this link
+    // - But the global "verified" flag is reserved for admin/KYC verification
+    // So we keep verified false here; admin panel can later promote to verified user.
+    verified: false
   });
   
   // Clean up verification tokens after successful signup

@@ -277,37 +277,26 @@ export const CompleteSignup = ({ onBack, onSuccess }: CompleteSignupProps) => {
                 required
               />
 
-              {/* Role Selection */}
+              {/* Role Selection - minimal dropdown */}
               <div>
-                <label className="block text-xs font-black text-gray-600 mb-3 uppercase tracking-tight">
-                  I am a
+                <label className="block text-xs font-black text-gray-600 mb-2 uppercase tracking-tight">
+                  What best describes you?
                 </label>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {(Object.keys(ROLE_INFO) as UserRole[]).map(role => {
-                    const info = ROLE_INFO[role];
-                    const isSelected = formData.role === role;
-                    return (
-                      <button
-                        key={role}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, role })}
-                        className={`p-4 rounded-xl border-2 transition-all text-left ${
-                          isSelected
-                            ? 'border-[#6F4E37] bg-[#F5EFE6] shadow-sm'
-                            : 'border-[#EBE3D5] bg-white hover:border-[#6F4E37]/50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">{info.icon}</span>
-                          <span className={`font-black text-xs uppercase ${isSelected ? 'text-[#6F4E37]' : 'text-gray-500'}`}>
-                            {info.label}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-1">{info.description}</p>
-                      </button>
-                    );
-                  })}
-                </div>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                  className="w-full bg-white border border-[#EBE3D5] rounded-xl px-4 py-3 outline-none focus:ring-2 ring-[#6F4E37]/10 text-sm"
+                >
+                  {(Object.keys(ROLE_INFO) as UserRole[]).map((role) => (
+                    <option key={role} value={role}>
+                      {ROLE_INFO[role].label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-[11px] text-gray-500">
+                  You can change this later in your profile. Some roles (like Expert, Exporter, Trader) may require additional
+                  verification by our team.
+                </p>
               </div>
 
               {/* Password */}
