@@ -17,7 +17,7 @@ interface RegisterProps {
 }
 
 type UserRole = 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert';
-type RegistrationStep = 'email' | 'otp' | 'details';
+type RegistrationStep = 'email' | 'check-email';
 
 const ROLE_INFO: { [key in UserRole]: { label: string; icon: string; description: string } } = {
   farmer: { label: 'Farmer', icon: '🌱', description: 'Grow and sell coffee' },
@@ -46,9 +46,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
     acceptTerms: false
   });
   
-  // OTP state
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [otpTimer, setOtpTimer] = useState(0);
+  // Verification link state
+  const [linkTimer, setLinkTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
   
   // UI state
@@ -60,15 +59,15 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
   const [success, setSuccess] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
-  // OTP timer countdown
+  // Resend timer countdown
   useEffect(() => {
-    if (otpTimer > 0) {
-      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
+    if (linkTimer > 0) {
+      const timer = setTimeout(() => setLinkTimer(linkTimer - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (step === 'otp') {
+    } else if (step === 'check-email') {
       setCanResend(true);
     }
-  }, [otpTimer, step]);
+  }, [linkTimer, step]);
 
   // Validate email step
   const validateEmail = () => {
@@ -143,8 +142,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
 
   const passwordStrength = getPasswordStrength(formData.password);
 
-  // Handle sending OTP
-  const handleSendOTP = async (e: React.FormEvent) => {
+  // Handle sending verification link
+  const handleSendVerificationLink = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateEmail()) return;
@@ -153,152 +152,43 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
     setSubmitError('');
     
     try {
-      const result = await authService.sendOTP(formData.email, captchaToken || undefined);
-      setStep('otp');
-      setOtpTimer(result.expiresIn || 600); // 10 minutes default
+      const result = await authService.requestSignupLink(formData.email, captchaToken || undefined);
+      setStep('check-email');
+      setLinkTimer(result.expiresIn || 1800); // 30 minutes default
       setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
     } catch (err: any) {
-      setSubmitError(err.message || 'Failed to send verification code');
+      setSubmitError(err.message || 'Failed to send verification link');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle OTP input
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return; // Only allow digits
-    
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1); // Only keep last digit
-    setOtp(newOtp);
-    
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  // Handle OTP paste
-  const handleOtpPaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    const newOtp = [...otp];
-    for (let i = 0; i < pastedData.length; i++) {
-      newOtp[i] = pastedData[i];
-    }
-    setOtp(newOtp);
-  };
-
-  // Handle OTP key down for backspace
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    }
-  };
-
-  // Handle OTP verification
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const otpString = otp.join('');
-    if (otpString.length !== 6) {
-      setSubmitError('Please enter the complete 6-digit code');
-      return;
-    }
-    
-    setIsLoading(true);
-    setSubmitError('');
-    
-    try {
-      await authService.verifyOTP(formData.email, otpString);
-      setStep('details');
-      // Reset captcha token when moving to details step - user will need to verify again
-      setCaptchaToken(null);
-    } catch (err: any) {
-      setSubmitError(err.message || 'Verification failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle resend OTP
-  const handleResendOTP = async () => {
+  // Handle resend verification link
+  const handleResendLink = async () => {
     if (!canResend) return;
     
     setIsLoading(true);
     setSubmitError('');
     
     try {
-      const result = await authService.resendOTP(formData.email, captchaToken || undefined);
-      setOtpTimer(result.expiresIn || 600);
+      const result = await authService.requestSignupLink(formData.email, captchaToken || undefined);
+      setLinkTimer(result.expiresIn || 1800);
       setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
       setSubmitError('');
     } catch (err: any) {
-      setSubmitError(err.message || 'Failed to resend code');
+      setSubmitError(err.message || 'Failed to resend verification link');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle final registration
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateDetails()) return;
-
-    setIsLoading(true);
-    setSubmitError('');
-
-    try {
-      await register({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        location: formData.location,
-        password: formData.password,
-        role: formData.role
-      }, captchaToken || undefined);
-      
-      setSuccess(true);
-      setSubmitError('');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        setUserRole(user.role || formData.role);
-      }
-      navigate('home');
-      setSubPage(null);
-      onSuccess?.();
-    } catch (err: any) {
-      console.error('Registration error:', err);
-      setSubmitError(err?.message || 'Registration failed. Please try again.');
-      setSuccess(false);
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 100);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Handle back button
   const handleBack = () => {
-    if (step === 'otp') {
+    if (step === 'check-email') {
       setStep('email');
-      setOtp(['', '', '', '', '', '']);
       setSubmitError('');
       // Reset captcha token when going back to email step
-      setCaptchaToken(null);
-    } else if (step === 'details') {
-      setStep('otp');
-      setSubmitError('');
-      // Reset captcha token when going back to OTP step
       setCaptchaToken(null);
     } else if (onBack) {
       onBack();
@@ -316,9 +206,9 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
     <>
       <LoadingOverlay 
         isVisible={isLoading} 
-        message={step === 'email' ? 'Sending verification code...' : step === 'otp' ? 'Verifying code...' : 'Creating your account...'}
+        message={step === 'email' ? 'Sending verification link...' : 'Processing...'}
         success={success}
-        successMessage="Account created successfully!"
+        successMessage="Verification link sent!"
       />
       <div className="min-h-screen bg-[#F8F5F2] p-6 pb-32 lg:pb-8">
         <button onClick={handleBack} className="mb-6 flex items-center gap-2 text-gray-600 hover:text-[#6F4E37] transition-colors">
@@ -337,27 +227,25 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
             </div>
             <h1 className="text-3xl lg:text-4xl font-black text-[#6F4E37] mb-2">
               {step === 'email' && 'Join CoffeeHubNepal'}
-              {step === 'otp' && 'Verify Your Email'}
-              {step === 'details' && 'Complete Your Profile'}
+              {step === 'check-email' && 'Check Your Email'}
             </h1>
             <p className="text-sm text-gray-600">
               {step === 'email' && 'Enter your email to get started'}
-              {step === 'otp' && `Enter the 6-digit code sent to ${formData.email}`}
-              {step === 'details' && 'Fill in your details to complete registration'}
+              {step === 'check-email' && `We've sent a verification link to ${formData.email}`}
             </p>
           </div>
 
           {/* Step indicators */}
           <div className="flex items-center justify-center gap-2 mb-6">
-            {['email', 'otp', 'details'].map((s, i) => (
+            {['email', 'check-email'].map((s, i) => (
               <div key={s} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                   step === s ? 'bg-[#6F4E37] text-white' : 
-                  ['email', 'otp', 'details'].indexOf(step) > i ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                  ['email', 'check-email'].indexOf(step) > i ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
                 }`}>
-                  {['email', 'otp', 'details'].indexOf(step) > i ? <CheckCircle size={16} /> : i + 1}
+                  {['email', 'check-email'].indexOf(step) > i ? <CheckCircle size={16} /> : i + 1}
                 </div>
-                {i < 2 && <div className={`w-8 h-1 ${['email', 'otp', 'details'].indexOf(step) > i ? 'bg-green-500' : 'bg-gray-200'}`} />}
+                {i < 1 && <div className={`w-8 h-1 ${['email', 'check-email'].indexOf(step) > i ? 'bg-green-500' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
@@ -372,7 +260,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
 
             {/* Step 1: Email */}
             {step === 'email' && (
-              <form onSubmit={handleSendOTP} className="space-y-5">
+              <form onSubmit={handleSendVerificationLink} className="space-y-5">
                 <Input
                   type="email"
                   label="Email Address"
@@ -409,7 +297,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
                 </div> */}
 
                 <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading}>
-                  {isLoading ? 'Sending...' : 'Send Verification Code'}
+                  {isLoading ? 'Sending...' : 'Send Verification Link'}
                 </Button>
 
                 <div className="text-center">
@@ -423,65 +311,52 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
               </form>
             )}
 
-            {/* Step 2: OTP Verification */}
-            {step === 'otp' && (
-              <form onSubmit={handleVerifyOTP} className="space-y-5">
+            {/* Step 2: Check Email */}
+            {step === 'check-email' && (
+              <div className="space-y-6 text-center">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                    <Mail className="text-blue-600" size={24} />
+                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                    <Mail className="text-blue-600" size={32} />
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-2">
-                  {otp.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`otp-${index}`}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      onPaste={handleOtpPaste}
-                      className="w-12 h-14 text-center text-2xl font-bold border-2 border-[#EBE3D5] rounded-xl focus:border-[#6F4E37] focus:ring-2 ring-[#6F4E37]/10 outline-none"
-                      autoFocus={index === 0}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-black text-[#6F4E37]">Check your email</h3>
+                  <p className="text-sm text-gray-600">
+                    We've sent a verification link to <span className="font-bold text-[#6F4E37]">{formData.email}</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Click the link in the email to complete your registration. The link will expire in 30 minutes.
+                  </p>
                 </div>
 
-                <div className="text-center">
-                  {otpTimer > 0 ? (
-                    <p className="text-sm text-gray-600">
-                      Code expires in <span className="font-bold text-[#6F4E37]">{formatTimer(otpTimer)}</span>
-                    </p>
-                  ) : (
-                    <p className="text-sm text-red-600 font-bold">Code expired</p>
-                  )}
-                </div>
-
-                <Button type="submit" variant="primary" className="w-full py-4" disabled={isLoading || otp.join('').length !== 6}>
-                  {isLoading ? 'Verifying...' : 'Verify Code'}
-                </Button>
-
-                <div className="text-center">
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 mb-4">
+                    Didn't receive the email? Check your spam folder or
+                  </p>
                   <button
                     type="button"
-                    onClick={handleResendOTP}
+                    onClick={handleResendLink}
                     disabled={!canResend || isLoading}
                     className={`text-sm font-bold inline-flex items-center gap-2 ${
                       canResend ? 'text-[#6F4E37] hover:underline' : 'text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    <RefreshCw size={14} />
-                    Resend Code
+                    <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                    {canResend ? 'Resend verification link' : `Resend in ${formatTimer(linkTimer)}`}
                   </button>
                 </div>
-              </form>
-            )}
 
-            {/* Step 3: Details */}
-            {step === 'details' && (
+                <div className="text-center pt-4">
+                  <p className="text-xs text-gray-500">
+                    Already have an account?{' '}
+                    <button type="button" onClick={() => navigate('login')} className="font-black text-[#6F4E37] hover:underline">
+                      Sign In
+                    </button>
+                  </p>
+                </div>
+              </div>
+            )}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 mb-4">
                   <CheckCircle className="text-green-600" size={18} />

@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { User, UserDocument, UserRole } from '../models/User.js';
 import { sendPasswordResetEmail } from './emailService.js';
 import { hasVerifiedOTP, cleanupOTP } from './otpService.js';
+import { validateVerificationToken, cleanupVerificationTokens } from './emailVerificationService.js';
 
 const SALT_ROUNDS = 10;
 
@@ -25,6 +26,61 @@ const tokenForUser = (user: UserDocument) =>
 
 const isLocked = (user: UserDocument) => user.lockUntil && user.lockUntil > new Date();
 
+/**
+ * Complete signup using email verification token
+ * This replaces the old OTP-based signup flow
+ */
+export const completeSignup = async (
+  token: string,
+  password: string,
+  name?: string,
+  role?: string,
+  phone?: string,
+  location?: string
+) => {
+  // Validate verification token
+  const tokenValidation = await validateVerificationToken(token);
+  if (!tokenValidation.valid) {
+    throw new Error('INVALID_VERIFICATION_TOKEN');
+  }
+
+  const normalizedEmail = tokenValidation.email.toLowerCase().trim();
+  
+  // Check if email is already registered
+  const existing = await User.findOne({ email: normalizedEmail });
+  if (existing) {
+    throw new Error('EMAIL_IN_USE');
+  }
+  
+  if (!isPasswordStrong(password)) {
+    throw new Error('WEAK_PASSWORD');
+  }
+  
+  // Validate role if provided - admin/moderator can only be assigned via admin panel
+  const allowedSignupRoles = ['farmer', 'roaster', 'trader', 'exporter', 'expert'];
+  const userRole = role && allowedSignupRoles.includes(role) ? role as UserRole : 'farmer';
+  
+  const passwordHash = await hashPassword(password);
+  const user = await User.create({ 
+    email: normalizedEmail, 
+    passwordHash,
+    name: name || undefined,
+    role: userRole,
+    phone: phone || undefined,
+    location: location || undefined,
+    verified: true // Email is verified via the link
+  });
+  
+  // Clean up verification tokens after successful signup
+  await cleanupVerificationTokens(normalizedEmail);
+  
+  return { token: tokenForUser(user), user };
+};
+
+/**
+ * Legacy signup function (kept for backward compatibility if needed)
+ * @deprecated Use completeSignup instead
+ */
 export const signup = async (
   email: string, 
   password: string,

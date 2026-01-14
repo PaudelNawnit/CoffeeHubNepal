@@ -32,6 +32,13 @@ interface OTPResponse {
   remainingAttempts?: number;
 }
 
+interface VerificationLinkResponse {
+  success: boolean;
+  message: string;
+  expiresIn?: number;
+  waitTime?: number;
+}
+
 export const authService = {
   async login(credentials: LoginCredentials, captchaToken?: string) {
     try {
@@ -128,7 +135,122 @@ export const authService = {
     }
   },
 
-  // Send OTP for email verification during signup
+  // Request signup verification link (new email link flow)
+  async requestSignupLink(email: string, _captchaToken?: string): Promise<VerificationLinkResponse> {
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      // TEMPORARILY DISABLED: Always send captcha-disabled for debugging
+      headers['x-captcha-token'] = 'captcha-disabled';
+
+      const response = await fetch(`${API_BASE_URL}/auth/request-signup-link`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error: ApiError = data;
+        if (error.code === 'TOO_MANY_REQUESTS') {
+          throw new Error(error.message || `Please wait before requesting another verification link.`);
+        }
+        if (error.code === 'FAILED_TO_SEND_EMAIL') {
+          throw new Error('Failed to send verification email. Please try again.');
+        }
+        throw new Error(error.message || 'Failed to send verification link.');
+      }
+
+      return data as VerificationLinkResponse;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Complete signup using verification token (new email link flow)
+  async completeSignup(
+    token: string,
+    data: RegisterData,
+    _captchaToken?: string
+  ) {
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      // TEMPORARILY DISABLED: Always send captcha-disabled for debugging
+      headers['x-captcha-token'] = 'captcha-disabled';
+
+      const requestBody = {
+        token,
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        phone: data.phone,
+        location: data.location,
+        role: data.role,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/auth/complete-signup`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const error: ApiError = result;
+        if (error.code === 'INVALID_VERIFICATION_TOKEN') {
+          throw new Error('Invalid or expired verification link. Please request a new one.');
+        }
+        if (error.code === 'EMAIL_IN_USE') {
+          throw new Error('This email is already registered. Please log in instead.');
+        }
+        if (error.code === 'WEAK_PASSWORD') {
+          throw new Error('Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers.');
+        }
+        throw new Error(error.message || 'Failed to complete signup. Please try again.');
+      }
+
+      // Store token and user
+      const mongoId = typeof result.user.id === 'string' ? result.user.id : result.user.id?.toString();
+      const userId = typeof result.user.id === 'string' ? parseInt(result.user.id, 16) || Date.now() : result.user.id;
+      const userWithDefaults = {
+        id: userId,
+        mongoId: mongoId,
+        email: result.user.email,
+        name: result.user.name || data.name || result.user.email.split('@')[0] || 'User',
+        phone: result.user.phone || data.phone || '',
+        location: result.user.location || data.location || '',
+        avatar: result.user.avatar || '',
+        role: (result.user.role || data.role || 'farmer') as 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert' | 'admin' | 'moderator',
+        verified: result.user.verified || false,
+        memberSince: new Date().getFullYear().toString()
+      };
+      
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(userWithDefaults));
+
+      return {
+        token: result.token,
+        user: userWithDefaults,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Send OTP for email verification during signup (legacy - kept for backward compatibility)
   async sendOTP(email: string, _captchaToken?: string): Promise<OTPResponse> {
     try {
       const headers: HeadersInit = {

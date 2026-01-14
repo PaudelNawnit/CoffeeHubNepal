@@ -35,22 +35,37 @@ export const createApp = () => {
     allowedOrigins.push(process.env.PRODUCTION_DOMAIN);
   }
   
+  // In development, also allow localhost with any port
+  if (!isProduction) {
+    allowedOrigins.push('http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000');
+  }
+  
+  console.log('[CORS] Allowed origins:', allowedOrigins);
+  console.log('[CORS] Client origin from env:', env.clientOrigin);
+  
   app.use(
     cors({
       origin: (origin, callback) => {
+        console.log('[CORS] Request origin:', origin);
         // Allow requests with no origin (same-origin, mobile apps, curl)
         if (!origin || staticFilesServed) {
+          console.log('[CORS] Allowing request (no origin or static files served)');
           callback(null, true);
           return;
         }
         // Check if origin is in allowed list
         if (allowedOrigins.includes(origin)) {
+          console.log('[CORS] Origin allowed');
           callback(null, true);
         } else {
+          console.log('[CORS] Origin NOT allowed. Allowed origins:', allowedOrigins);
           callback(new Error('Not allowed by CORS'));
         }
       },
-      credentials: true
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-captcha-token'],
+      exposedHeaders: ['Content-Type', 'Authorization']
     })
   );
   
@@ -108,6 +123,20 @@ export const createApp = () => {
   }
 
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    // Don't send error response if headers already sent (CORS might have already responded)
+    if (res.headersSent) {
+      return _next(err);
+    }
+    
+    // Handle CORS errors specifically
+    if (err.message === 'Not allowed by CORS') {
+      console.error('[CORS] CORS error:', err.message);
+      return res.status(403).json({ 
+        error: 'CORS_ERROR',
+        message: 'Not allowed by CORS'
+      });
+    }
+    
     console.error('Unhandled error:', err);
     console.error('Error stack:', err.stack);
     res.status(500).json({ 

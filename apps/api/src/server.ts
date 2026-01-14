@@ -3,6 +3,7 @@ import { connectDb } from './config/db.js';
 import { env } from './config/env.js';
 // Import models to ensure they're registered
 import './models/OTP.js';
+import './models/EmailVerificationToken.js';
 
 const start = async () => {
   await connectDb();

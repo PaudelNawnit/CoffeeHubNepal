@@ -37,6 +37,7 @@ const Register = lazy(() => import('./pages/auth/Register').then(m => ({ default
 const FarmerVerification = lazy(() => import('./pages/auth/FarmerVerification').then(m => ({ default: m.FarmerVerification })));
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
 const ResetPassword = lazy(() => import('./pages/auth/ResetPassword').then(m => ({ default: m.ResetPassword })));
+const CompleteSignup = lazy(() => import('./pages/auth/CompleteSignup').then(m => ({ default: m.CompleteSignup })));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.Dashboard })));
 const Verifications = lazy(() => import('./pages/admin/Verifications').then(m => ({ default: m.Verifications })));
 const Reports = lazy(() => import('./pages/admin/Reports').then(m => ({ default: m.Reports })));
@@ -75,13 +76,20 @@ const AppContent = () => {
     }
   }, [user, setUserRole]);
 
-  // Handle URL-based navigation for reset password (from email links)
+  // Handle URL-based navigation for reset password and complete signup (from email links)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+    const pathname = window.location.pathname;
     
-    // Check if URL has reset-password path or token parameter
-    if (token || window.location.pathname.includes('reset-password')) {
+    // Check if URL has complete-signup path
+    if (pathname.includes('complete-signup')) {
+      setSubPage('complete-signup');
+      return;
+    }
+    
+    // Check if URL has reset-password path or token parameter (for password reset)
+    if (pathname.includes('reset-password') || token) {
       setSubPage('reset-password');
       // Store token in sessionStorage so ResetPassword component can access it
       if (token) {
@@ -191,6 +199,9 @@ const AppContent = () => {
   }
   if (subPage === 'reset-password') {
     return <Suspense fallback={<PageLoader />}><ResetPassword onBack={handleBack} /></Suspense>;
+  }
+  if (subPage === 'complete-signup') {
+    return <Suspense fallback={<PageLoader />}><CompleteSignup onBack={handleBack} onSuccess={() => setSubPage(null)} /></Suspense>;
   }
 
   // Admin pages - only accessible to admins and moderators

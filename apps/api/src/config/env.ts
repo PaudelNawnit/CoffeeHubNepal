@@ -1,7 +1,20 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+const envPath = path.resolve(process.cwd(), '.env');
+console.log('[Env Config] Loading .env from:', envPath);
+console.log('[Env Config] Current working directory:', process.cwd());
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  console.error('[Env Config] Error loading .env file:', result.error);
+} else {
+  console.log('[Env Config] .env file loaded successfully');
+  console.log('[Env Config] MONGO_URI is set:', !!process.env.MONGO_URI);
+  if (process.env.MONGO_URI) {
+    console.log('[Env Config] MONGO_URI length:', process.env.MONGO_URI.length);
+    console.log('[Env Config] MONGO_URI starts with:', process.env.MONGO_URI.substring(0, 30));
+  }
+}
 
 const toNumber = (value: string | undefined, fallback: number) => {
   const parsed = Number(value);

@@ -5,8 +5,9 @@ import { captchaCheck } from '../middleware/captcha.js';
 import { accountRateLimiter, passwordResetRateLimiter } from '../middleware/rateLimit.js';
 import { validate } from '../middleware/validate.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
-import { isPasswordStrong, login, signup, requestPasswordReset, resetPassword } from '../services/authService.js';
+import { isPasswordStrong, login, signup, completeSignup, requestPasswordReset, resetPassword } from '../services/authService.js';
 import { sendSignupOTP, verifySignupOTP, resendSignupOTP } from '../services/otpService.js';
+import { requestSignupVerificationLink } from '../services/emailVerificationService.js';
 import { User } from '../models/User.js';
 
 const router = Router();
@@ -50,7 +51,134 @@ const resetPasswordSchema = z.object({
   password: passwordSchema
 });
 
-// Send OTP for signup email verification
+const requestSignupLinkSchema = z.object({
+  email: emailSchema
+});
+
+const completeSignupSchema = z.object({
+  token: z.string().min(1),
+  password: passwordSchema,
+  name: z.string().optional(),
+  role: z.enum(['farmer', 'roaster', 'trader', 'exporter', 'expert']).optional(),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  email: z.string().email().optional() // Optional - email is extracted from token, but allow it for compatibility
+});
+
+// Request signup verification link (new email link flow)
+router.post(
+  '/request-signup-link',
+  accountRateLimiter,
+  captchaCheck,
+  validate(requestSignupLinkSchema),
+  async (req, res) => {
+    const { email } = req.body;
+    try {
+      console.log('[Auth Route] Requesting signup verification link for:', email);
+      const result = await requestSignupVerificationLink(email);
+      console.log('[Auth Route] Signup verification link sent successfully');
+      return res.json(result);
+    } catch (error: any) {
+      const err = error?.message || String(error);
+      console.error('[Auth Route] Request signup link error:', error);
+      console.error('[Auth Route] Error message:', err);
+      
+      if (!res.headersSent) {
+        if (err && typeof err === 'string' && err.startsWith('WAIT_')) {
+          const seconds = err.replace('WAIT_', '').replace('_SECONDS', '');
+          return res.status(429).json({ 
+            error: 'TOO_MANY_REQUESTS', 
+            code: 'TOO_MANY_REQUESTS',
+            message: `Please wait ${seconds} seconds before requesting another verification link.`,
+            waitTime: parseInt(seconds) || 60
+          });
+        }
+        if (err === 'FAILED_TO_SEND_EMAIL') {
+          return res.status(500).json({ 
+            error: 'FAILED_TO_SEND_EMAIL', 
+            code: 'FAILED_TO_SEND_EMAIL',
+            message: 'Failed to send verification email. Please try again.'
+          });
+        }
+        console.error('[Auth Route] Unexpected error type:', {
+          errorMessage: err,
+          errorType: error?.constructor?.name,
+          errorStack: error?.stack
+        });
+        return res.status(500).json({ 
+          error: 'REQUEST_LINK_FAILED',
+          code: 'REQUEST_LINK_FAILED',
+          message: err || 'Failed to send verification link. Please try again.'
+        });
+      }
+    }
+  }
+);
+
+// Complete signup using verification token (new email link flow)
+router.post(
+  '/complete-signup',
+  accountRateLimiter,
+  captchaCheck,
+  validate(completeSignupSchema),
+  async (req, res) => {
+    const { token, password, name, role, phone, location } = req.body;
+    try {
+      const result = await completeSignup(token, password, name, role, phone, location);
+      return res.status(201).json({
+        token: result.token,
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          name: result.user.name,
+          role: result.user.role,
+          phone: result.user.phone,
+          location: result.user.location,
+          verified: result.user.verified
+        }
+      });
+    } catch (error: any) {
+      const err = error?.message || String(error);
+      console.error('[Auth Route] Complete signup error:', error);
+      
+      if (!res.headersSent) {
+        if (err === 'INVALID_VERIFICATION_TOKEN') {
+          return res.status(400).json({ 
+            error: 'INVALID_VERIFICATION_TOKEN', 
+            code: 'INVALID_VERIFICATION_TOKEN',
+            message: 'Invalid or expired verification link. Please request a new one.'
+          });
+        }
+        if (err === 'EMAIL_IN_USE') {
+          return res.status(409).json({ 
+            error: 'EMAIL_IN_USE', 
+            code: 'EMAIL_IN_USE',
+            message: 'This email is already registered. Please log in instead.'
+          });
+        }
+        if (err === 'WEAK_PASSWORD') {
+          return res.status(400).json({ 
+            error: 'WEAK_PASSWORD', 
+            code: 'WEAK_PASSWORD',
+            message: 'Password must be at least 8 characters and contain uppercase, lowercase, and a number.'
+          });
+        }
+        console.error('[Auth Route] Unexpected error type:', {
+          errorMessage: err,
+          errorType: error?.constructor?.name,
+          errorStack: error?.stack
+        });
+        return res.status(500).json({ 
+          error: 'COMPLETE_SIGNUP_FAILED',
+          code: 'COMPLETE_SIGNUP_FAILED',
+          message: err || 'Failed to complete signup. Please try again.'
+        });
+      }
+    }
+  }
+);
+
+// Send OTP for signup email verification (legacy - kept for backward compatibility)
 router.post(
   '/send-otp',
   accountRateLimiter,

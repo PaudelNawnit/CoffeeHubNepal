@@ -121,11 +121,18 @@ export const sendSignupOTP = async (email: string): Promise<{ success: boolean; 
       // #endregion
     } catch (error) {
       console.error('[OTP Service] Email sending error:', error);
+      console.error('[OTP Service] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('[OTP Service] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[OTP Service] Error stack:', error instanceof Error ? error.stack : 'N/A');
       // #region agent log
-      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:71',message:'OTP email error',data:{errorMessage:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch(e){}
+      try{appendFileSync('c:\\Users\\suraj\\OneDrive - Yuva Samaj Sewa Rautahat\\Desktop\\CHN Updated\\.cursor\\debug.log',JSON.stringify({location:'otpService.ts:71',message:'OTP email error',data:{errorMessage:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch(e){console.error('[DEBUG] Failed to write log:', e);}
       // #endregion
       // Delete the OTP if email sending fails
-      await OTP.deleteOne({ email: normalizedEmail, purpose: 'signup', otp });
+      try {
+        await OTP.deleteOne({ email: normalizedEmail, purpose: 'signup', otp });
+      } catch (deleteError) {
+        console.error('[OTP Service] Failed to delete OTP after email error:', deleteError);
+      }
       throw new Error('FAILED_TO_SEND_OTP');
     }
 
