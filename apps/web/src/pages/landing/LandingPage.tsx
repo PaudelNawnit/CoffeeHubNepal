@@ -5,9 +5,9 @@ import { Badge } from '@/components/common/Badge';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useCountUp } from '@/hooks/useCountUp';
-import logoImage from '@/assets/images/logo/coffeelogo.webp';
-import coffeeImage from '@/assets/images/coffee.webp';
-import farmersHandshakeImage from '@/assets/images/landing/farmers-handshake.webp';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
+import coffeeImage from '@/assets/images/coffee.png';
+import farmersHandshakeImage from '@/assets/images/landing/farmers-handshake.png';
 
 export const LandingPage = () => {
   const { navigate } = useApp();

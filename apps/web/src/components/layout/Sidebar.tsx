@@ -2,7 +2,7 @@ import { Calendar, DollarSign, Briefcase } from 'lucide-react'; // Keep these fo
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
-import logoImage from '@/assets/images/logo/coffeelogo.webp';
+import logoImage from '@/assets/images/logo/coffeelogo.png';
 import { t } from '@/i18n';
 
 interface SidebarProps {
