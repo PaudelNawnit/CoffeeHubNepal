@@ -6,7 +6,8 @@ import { sendSignupVerificationLinkEmail } from './emailService.js';
 import { env } from '../config/env.js';
 
 const TOKEN_EXPIRY_MINUTES = 30;
-const RESEND_COOLDOWN_SECONDS = 60;
+// For local testing we want instant re-request; keep a cooldown in production
+const RESEND_COOLDOWN_SECONDS = process.env.NODE_ENV === 'production' ? 60 : 0;
 
 /**
  * Generate a secure random token for email verification
@@ -40,6 +41,7 @@ export const requestSignupVerificationLink = async (
 
   // Check for recent verification link (prevent spam)
   const recentToken = await EmailVerificationToken.findOne({
+    type: 'verification-token',
     email: normalizedEmail,
     expiresAt: { $gt: new Date() },
     usedAt: null,
@@ -55,6 +57,7 @@ export const requestSignupVerificationLink = async (
 
   // Delete any existing unused tokens for this email
   await EmailVerificationToken.deleteMany({
+    type: 'verification-token',
     email: normalizedEmail,
     usedAt: null
   });
@@ -68,11 +71,19 @@ export const requestSignupVerificationLink = async (
   await EmailVerificationToken.create({
     email: normalizedEmail,
     tokenHash,
-    expiresAt
+    expiresAt,
+    type: 'verification-token'
   });
 
-  // Build verification link
-  const verificationLink = `${env.clientOrigin}/complete-signup?token=${plainToken}`;
+  // Build verification link - ensure it has a protocol
+  let baseUrl = env.clientOrigin;
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    // If no protocol, assume http for localhost, https otherwise
+    baseUrl = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') 
+      ? `http://${baseUrl}` 
+      : `https://${baseUrl}`;
+  }
+  const verificationLink = `${baseUrl}/complete-signup?token=${plainToken}`;
 
   // Send verification email
   try {
@@ -82,6 +93,7 @@ export const requestSignupVerificationLink = async (
     console.error('[Email Verification] Email sending error:', error);
     // Delete the token if email sending fails
     await EmailVerificationToken.deleteOne({
+      type: 'verification-token',
       email: normalizedEmail,
       tokenHash
     });
@@ -101,8 +113,9 @@ export const requestSignupVerificationLink = async (
 export const validateVerificationToken = async (
   token: string
 ): Promise<{ email: string; valid: boolean }> => {
-  // Find all unused tokens that haven't expired
+  // Find all unused tokens that haven't expired (filter by type to distinguish from OTPs)
   const tokens = await EmailVerificationToken.find({
+    type: 'verification-token',
     usedAt: null,
     expiresAt: { $gt: new Date() }
   });
@@ -135,6 +148,7 @@ export const hasValidVerificationToken = async (email: string): Promise<boolean>
   const normalizedEmail = email.toLowerCase().trim();
 
   const token = await EmailVerificationToken.findOne({
+    type: 'verification-token',
     email: normalizedEmail,
     usedAt: null,
     expiresAt: { $gt: new Date() }
@@ -148,5 +162,8 @@ export const hasValidVerificationToken = async (email: string): Promise<boolean>
  */
 export const cleanupVerificationTokens = async (email: string): Promise<void> => {
   const normalizedEmail = email.toLowerCase().trim();
-  await EmailVerificationToken.deleteMany({ email: normalizedEmail });
+  await EmailVerificationToken.deleteMany({ 
+    type: 'verification-token',
+    email: normalizedEmail 
+  });
 };

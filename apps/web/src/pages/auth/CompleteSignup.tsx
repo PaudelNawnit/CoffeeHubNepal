@@ -5,7 +5,6 @@ import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { LoadingOverlay } from '@/components/common/LoadingOverlay';
 import { useApp } from '@/context/AppContext';
-import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/services/auth.service';
 import logoImage from '@/assets/images/logo/coffeelogo.png';
 
@@ -26,7 +25,6 @@ const ROLE_INFO: { [key in UserRole]: { label: string; icon: string; description
 
 export const CompleteSignup = ({ onBack, onSuccess }: CompleteSignupProps) => {
   const { navigate, setUserRole, setSubPage } = useApp();
-  const { register } = useAuth();
   
   // Get token from URL
   const [token, setToken] = useState<string>('');
@@ -131,9 +129,8 @@ export const CompleteSignup = ({ onBack, onSuccess }: CompleteSignupProps) => {
     setSubmitError('');
 
     try {
-      const result = await authService.completeSignup(token, {
+      await authService.completeSignup(token, {
         name: formData.name,
-        email: '', // Email is extracted from token on backend, not needed here
         phone: formData.phone,
         location: formData.location,
         password: formData.password,

@@ -59,7 +59,7 @@ const userSchema = new Schema<UserDocument>(
 
 // Performance indexes
 userSchema.index({ resetToken: 1 });
-userSchema.index({ email: 1 }); // Already unique, but explicit index helps
+// Note: email already has unique index, no need for additional index
 userSchema.index({ role: 1, verified: 1 }); // For admin queries
 userSchema.index({ createdAt: -1 }); // For sorting
 

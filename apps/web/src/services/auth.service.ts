@@ -14,6 +14,14 @@ export interface RegisterData {
   role: 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert';
 }
 
+export type CompleteSignupData = Omit<RegisterData, 'email'> & {
+  /**
+   * Email is derived from the verification token on the backend.
+   * Keep optional for backwards compatibility (do NOT send empty string).
+   */
+  email?: string;
+};
+
 interface ApiError {
   error: string;
   code?: string;
@@ -176,7 +184,7 @@ export const authService = {
   // Complete signup using verification token (new email link flow)
   async completeSignup(
     token: string,
-    data: RegisterData,
+    data: CompleteSignupData,
     _captchaToken?: string
   ) {
     try {
@@ -189,7 +197,6 @@ export const authService = {
 
       const requestBody = {
         token,
-        email: data.email,
         password: data.password,
         name: data.name,
         phone: data.phone,
@@ -207,6 +214,10 @@ export const authService = {
 
       if (!response.ok) {
         const error: ApiError = result;
+        if (error.error === 'VALIDATION_ERROR') {
+          const details = error.details ? ` Details: ${JSON.stringify(error.details)}` : '';
+          throw new Error(`Please check your information and try again.${details}`);
+        }
         if (error.code === 'INVALID_VERIFICATION_TOKEN') {
           throw new Error('Invalid or expired verification link. Please request a new one.');
         }

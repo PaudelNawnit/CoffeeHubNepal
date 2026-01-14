@@ -562,7 +562,15 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string):
   console.log(`[Email Service] SMTP_PASS set: ${!!env.smtpPass}`);
   console.log(`[Email Service] SMTP_FROM: ${env.smtpFrom}`);
   
-  const resetUrl = `${env.clientOrigin}/reset-password?token=${resetToken}`;
+  // Build reset URL - ensure it has a protocol
+  let baseUrl = env.clientOrigin;
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    // If no protocol, assume http for localhost, https otherwise
+    baseUrl = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') 
+      ? `http://${baseUrl}` 
+      : `https://${baseUrl}`;
+  }
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
   // Try Azure Email SDK first
   if (isAzureEmail) {
@@ -654,6 +662,19 @@ If you didn't request a password reset, please ignore this email. Your password 
           statusCode: error.statusCode,
           details: error.details
         });
+        
+        // In development mode, fall back to console logging instead of failing
+        const isDevelopment = process.env.NODE_ENV !== 'production';
+        if (isDevelopment) {
+          console.warn('[Email Service] Azure email failed, falling back to console logging (development mode)');
+          console.log('\n=== PASSWORD RESET LINK (Development Mode - Azure Failed) ===');
+          console.log(`Email: ${email}`);
+          console.log(`Reset Link: ${resetUrl}`);
+          console.log(`Expires in: ${env.resetTokenExpiryHours} hour(s)`);
+          console.log('===========================================================\n');
+          return; // Successfully logged, don't throw error
+        }
+        
         throw new Error('FAILED_TO_SEND_EMAIL');
       }
     }

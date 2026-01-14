@@ -16,8 +16,7 @@ const otpSchema = new Schema<OTPDocument>(
       type: String,
       required: true,
       lowercase: true,
-      trim: true,
-      index: true
+      trim: true
     },
     otp: {
       type: String,
@@ -30,8 +29,7 @@ const otpSchema = new Schema<OTPDocument>(
     },
     expiresAt: {
       type: Date,
-      required: true,
-      index: true
+      required: true
     },
     attempts: {
       type: Number,

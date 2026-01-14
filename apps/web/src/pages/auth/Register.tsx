@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Eye, EyeOff, CheckCircle, AlertCircle, Mail, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, Mail, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
@@ -7,7 +7,6 @@ import { LoadingOverlay } from '@/components/common/LoadingOverlay';
 // TEMPORARILY DISABLED: CAPTCHA for debugging OTP flow
 // import { Captcha } from '@/components/common/Captcha';
 import { useApp } from '@/context/AppContext';
-import { useAuth } from '@/context/AuthContext';
 import { authService } from '@/services/auth.service';
 import logoImage from '@/assets/images/logo/coffeelogo.png';
 
@@ -16,34 +15,17 @@ interface RegisterProps {
   onSuccess?: () => void;
 }
 
-type UserRole = 'farmer' | 'roaster' | 'trader' | 'exporter' | 'expert';
 type RegistrationStep = 'email' | 'check-email';
 
-const ROLE_INFO: { [key in UserRole]: { label: string; icon: string; description: string } } = {
-  farmer: { label: 'Farmer', icon: '🌱', description: 'Grow and sell coffee' },
-  roaster: { label: 'Roaster', icon: '🔥', description: 'Roast and process beans' },
-  trader: { label: 'Trader', icon: '💼', description: 'Buy and sell coffee' },
-  exporter: { label: 'Exporter', icon: '✈️', description: 'Export coffee internationally' },
-  expert: { label: 'Expert', icon: '🎓', description: 'Share knowledge and advice' }
-};
-
-export const Register = ({ onBack, onSuccess }: RegisterProps) => {
-  const { navigate, setUserRole, setSubPage } = useApp();
-  const { register } = useAuth();
+export const Register = ({ onBack }: RegisterProps) => {
+  const { navigate } = useApp();
   
   // Registration step
   const [step, setStep] = useState<RegistrationStep>('email');
   
   // Form data
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    location: '',
-    password: '',
-    confirmPassword: '',
-    role: 'farmer' as UserRole,
-    acceptTerms: false
+    email: ''
   });
   
   // Verification link state
@@ -52,11 +34,8 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   // Resend timer countdown
@@ -88,59 +67,6 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Validate details step
-  const validateDetails = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = 'Invalid phone number';
-    }
-
-    if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'You must accept the terms and conditions';
-    }
-
-    // TEMPORARILY DISABLED: CAPTCHA validation for debugging
-    // Validate captcha for final registration
-    // if (!captchaToken) {
-    //   newErrors.captcha = 'Please complete the CAPTCHA verification';
-    // }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const getPasswordStrength = (password: string) => {
-    if (password.length === 0) return { strength: 0, label: '', color: '' };
-    if (password.length < 6) return { strength: 1, label: 'Weak', color: 'bg-red-500' };
-    if (password.length < 8) return { strength: 2, label: 'Fair', color: 'bg-yellow-500' };
-    if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-      return { strength: 3, label: 'Strong', color: 'bg-green-500' };
-    }
-    return { strength: 2, label: 'Fair', color: 'bg-yellow-500' };
-  };
-
-  const passwordStrength = getPasswordStrength(formData.password);
 
   // Handle sending verification link
   const handleSendVerificationLink = async (e: React.FormEvent) => {
@@ -207,7 +133,7 @@ export const Register = ({ onBack, onSuccess }: RegisterProps) => {
       <LoadingOverlay 
         isVisible={isLoading} 
         message={step === 'email' ? 'Sending verification link...' : 'Processing...'}
-        success={success}
+        success={false}
         successMessage="Verification link sent!"
       />
       <div className="min-h-screen bg-[#F8F5F2] p-6 pb-32 lg:pb-8">

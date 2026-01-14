@@ -22,8 +22,7 @@ const priceSchema = new Schema<PriceDocument>(
       type: String,
       required: true,
       unique: true,
-      trim: true,
-      index: true
+      trim: true
     },
     price: {
       type: Number,
@@ -69,7 +68,7 @@ const priceSchema = new Schema<PriceDocument>(
 
 // Performance indexes
 priceSchema.index({ active: 1, createdAt: -1 });
-priceSchema.index({ variety: 1 });
+// Note: variety already has unique index, no need for additional index
 
 export const Price = mongoose.model<PriceDocument>('Price', priceSchema);
 
