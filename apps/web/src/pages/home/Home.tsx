@@ -33,11 +33,13 @@ export const Home = ({ onNavigate }: HomeProps) => {
   };
   
   return (
-    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 pb-32 lg:pb-8">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-32 lg:pb-8">
       {/* Dynamic Price Ticker */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-black text-sm uppercase text-gray-400 tracking-widest">{t(language, 'home.liveMarketPrices')}</h3>
+          <h3 className="font-black text-xs sm:text-sm uppercase text-gray-400 tracking-widest">
+            {t(language, 'home.liveMarketPrices')}
+          </h3>
           <TrendingUp className="text-[#3A7D44]" size={16}/>
         </div>
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -47,25 +49,25 @@ export const Home = ({ onNavigate }: HomeProps) => {
           <div className="text-center py-4 text-gray-500 text-sm">No prices available</div>
         ) : (
           prices.map((p) => (
-            <Card key={p._id || p.id} className="min-w-[140px] p-4 flex flex-col gap-2">
-              {p.image && (
-                <div className="w-full h-20 rounded-lg overflow-hidden bg-gray-100 mb-1">
-                  <img 
-                    src={p.image} 
-                    alt={p.variety}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-              <span className="text-[10px] font-bold text-gray-500">{p.variety}</span>
-              <p className="font-black text-lg">रू {p.price}</p>
-              <span className={`text-[10px] font-black ${p.trend === 'up' ? 'text-green-600' : p.trend === 'down' ? 'text-red-500' : 'text-gray-500'}`}>
-                {p.change || '0.0%'}
-              </span>
-            </Card>
+          <Card key={p._id || p.id} className="min-w-[140px] max-w-[180px] p-4 flex flex-col gap-2">
+            {p.image && (
+            <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 mb-1">
+              <img 
+                src={p.image} 
+                alt={p.variety}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+            )}
+            <span className="text-[10px] font-bold text-gray-500">{p.variety}</span>
+            <p className="font-black text-base sm:text-lg">रू {p.price}</p>
+            <span className={`text-[10px] font-black ${p.trend === 'up' ? 'text-green-600' : p.trend === 'down' ? 'text-red-500' : 'text-gray-500'}`}>
+              {p.change || '0.0%'}
+            </span>
+          </Card>
           ))
         )}
       </div>
@@ -93,7 +95,7 @@ export const Home = ({ onNavigate }: HomeProps) => {
       </Card> */}
 
     {/* Quick Access Grid */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <Card className="p-5 flex items-center gap-4 group" onClick={() => onNavigate('jobs')}>
         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
           <Briefcase size={24}/>
@@ -116,10 +118,12 @@ export const Home = ({ onNavigate }: HomeProps) => {
     </div>
 
     {/* Weather Alert */}
-    <div className="bg-red-50 border-2 border-red-100 p-5 rounded-[32px] flex gap-4">
+    <div className="bg-red-50 border-2 border-red-100 p-4 sm:p-5 rounded-[24px] sm:rounded-[32px] flex gap-3 sm:gap-4">
       <ShieldAlert className="text-red-600 shrink-0" size={24}/>
-      <div className="text-xs">
-        <h5 className="font-black text-red-800 uppercase tracking-tight">{t(language, 'home.weatherAlertTitle')}</h5>
+      <div className="text-xs sm:text-sm">
+        <h5 className="font-black text-red-800 uppercase tracking-tight">
+          {t(language, 'home.weatherAlertTitle')}
+        </h5>
         <p className="text-red-700 leading-normal mt-1">
           {t(language, 'home.weatherAlertBody')}
         </p>

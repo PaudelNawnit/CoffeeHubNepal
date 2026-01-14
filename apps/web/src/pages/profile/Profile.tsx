@@ -238,8 +238,8 @@ export const Profile = () => {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in pb-32 lg:pb-8 pt-10">
-    <div className="flex items-center gap-6">
+    <div className="space-y-8 animate-in fade-in pb-32 lg:pb-8 pt-10">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
       <div 
         ref={dropZoneRef}
         className={`w-24 h-24 rounded-[32px] bg-[#6F4E37] p-1 border-4 border-white shadow-2xl relative ${
@@ -265,7 +265,7 @@ export const Profile = () => {
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingImage}
-            className="bg-white p-2 rounded-xl shadow-lg text-[#6F4E37] border border-[#EBE3D5] hover:bg-gray-50 disabled:opacity-50"
+            className="bg-white p-2 rounded-xl shadow-lg text-[#6F4E37] border border-[#EBE3D5] hover:bg-gray-50 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Upload image"
           >
             {uploadingImage ? (
@@ -278,7 +278,7 @@ export const Profile = () => {
             <button 
               onClick={handleRemoveImage}
               disabled={uploadingImage}
-              className="bg-white p-2 rounded-xl shadow-lg text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50"
+              className="bg-white p-2 rounded-xl shadow-lg text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="Remove image"
             >
               <X size={16}/>
@@ -294,9 +294,9 @@ export const Profile = () => {
           </div>
         )}
       </div>
-      <div>
+      <div className="w-full">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-black">{displayName}</h2>
+          <h2 className="text-2xl sm:text-3xl font-black">{displayName}</h2>
           {isVerified && <CheckCircle className="text-blue-500" size={18} fill="currentColor" />}
         </div>
         <div className="flex items-center gap-2 mt-1">
@@ -315,7 +315,7 @@ export const Profile = () => {
       </div>
     </div>
 
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 sm:grid-cols-3 gap-4">
       {[
         { label: "Active Ads", val: loadingStats ? "..." : userStats.activeAds.toString(), icon: Store },
         { label: "QA Karma", val: loadingStats ? "..." : userStats.qaKarma.toString(), icon: MessageSquare },

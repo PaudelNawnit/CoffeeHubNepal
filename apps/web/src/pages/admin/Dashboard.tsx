@@ -67,7 +67,7 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F5F2] pb-32">
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#EBE3D5] px-6 py-4 flex items-center gap-4">
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#EBE3D5] px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
         <button 
           onClick={() => {
             setCurrentPage('home');
@@ -82,9 +82,9 @@ export const Dashboard = () => {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Platform Overview</p>
         </div>
       </div>
-      <div className="p-6 space-y-6 animate-in fade-in">
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-6 animate-in fade-in">
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {dashboardStats.map((stat, idx) => (
           <Card key={idx} className="p-6">
             <div className="flex items-center justify-between mb-4">

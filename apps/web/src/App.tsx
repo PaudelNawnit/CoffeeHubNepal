@@ -278,12 +278,14 @@ const AppContent = () => {
     // If sub-page exists, render it with sidebar
     if (subPage) {
       return (
-        <div className="min-h-screen bg-coffee-beige font-body text-coffee-dark flex">
+        <div className="min-h-screen bg-[#F8F5F2] font-body text-[#2D241E] flex">
           <Sidebar onMenuOpen={() => setIsMenuOpen(true)} />
           <div className="flex-1 flex flex-col min-w-0">
             <DesktopHeader />
             <main className="flex-1 overflow-y-auto">
-              {renderSubPage()}
+              <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] mx-auto">
+                {renderSubPage()}
+              </div>
             </main>
           </div>
           <CreateMenu 
@@ -304,7 +306,7 @@ const AppContent = () => {
           <DesktopHeader />
           
           <main className="flex-1 overflow-y-auto">
-            <div className="max-w-7xl mx-auto px-8 py-6">
+            <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] mx-auto">
               <Suspense fallback={<PageLoader />}>
                 {currentPage === 'home' && <Home onNavigate={(page) => {
                   setCurrentPage(page);
@@ -315,13 +317,13 @@ const AppContent = () => {
                 {currentPage === 'notices' && <Notices />}
                 {currentPage === 'blog' && <BlogList />}
                 {currentPage === 'prices' && <PriceBoard />}
-              {currentPage === 'events' && <Events />}
-              {currentPage === 'groups' && <Groups />}
-              {currentPage === 'about' && <AboutUs />}
-              {currentPage === 'contact' && <ContactUs />}
-              {currentPage === 'faq' && <FAQ />}
-              {currentPage === 'privacy' && <PrivacyPolicy />}
-              {currentPage === 'terms' && <TermsOfService />}
+                {currentPage === 'events' && <Events />}
+                {currentPage === 'groups' && <Groups />}
+                {currentPage === 'about' && <AboutUs />}
+                {currentPage === 'contact' && <ContactUs />}
+                {currentPage === 'faq' && <FAQ />}
+                {currentPage === 'privacy' && <PrivacyPolicy />}
+                {currentPage === 'terms' && <TermsOfService />}
               </Suspense>
             </div>
           </main>
@@ -340,7 +342,7 @@ const AppContent = () => {
   // If sub-page exists, render it (sub-pages have their own headers)
   if (subPage) {
     return (
-      <div className="min-h-screen bg-coffee-beige font-body text-coffee-dark max-w-2xl mx-auto shadow-2xl relative">
+      <div className="min-h-screen bg-[#F8F5F2] font-body text-[#2D241E] max-w-2xl mx-auto shadow-2xl relative">
         {renderSubPage()}
         <CreateMenu 
           isOpen={isMenuOpen}
@@ -357,24 +359,26 @@ const AppContent = () => {
       <Header />
       
       <main className="min-h-screen">
-        <Suspense fallback={<PageLoader />}>
-          {currentPage === 'home' && <Home onNavigate={(page) => {
-            setCurrentPage(page);
-          }} />}
-          {currentPage === 'market' && <Marketplace />}
-          {currentPage === 'jobs' && <Jobs />}
-          {currentPage === 'profile' && <Profile />}
-          {currentPage === 'notices' && <Notices />}
-          {currentPage === 'blog' && <BlogList />}
-          {currentPage === 'prices' && <PriceBoard />}
-          {currentPage === 'events' && <Events />}
-          {currentPage === 'groups' && <Groups />}
-          {currentPage === 'about' && <AboutUs />}
-          {currentPage === 'contact' && <ContactUs />}
-          {currentPage === 'faq' && <FAQ />}
-          {currentPage === 'privacy' && <PrivacyPolicy />}
-          {currentPage === 'terms' && <TermsOfService />}
-        </Suspense>
+        <div className="px-4 py-4 space-y-4">
+          <Suspense fallback={<PageLoader />}>
+            {currentPage === 'home' && <Home onNavigate={(page) => {
+              setCurrentPage(page);
+            }} />}
+            {currentPage === 'market' && <Marketplace />}
+            {currentPage === 'jobs' && <Jobs />}
+            {currentPage === 'profile' && <Profile />}
+            {currentPage === 'notices' && <Notices />}
+            {currentPage === 'blog' && <BlogList />}
+            {currentPage === 'prices' && <PriceBoard />}
+            {currentPage === 'events' && <Events />}
+            {currentPage === 'groups' && <Groups />}
+            {currentPage === 'about' && <AboutUs />}
+            {currentPage === 'contact' && <ContactUs />}
+            {currentPage === 'faq' && <FAQ />}
+            {currentPage === 'privacy' && <PrivacyPolicy />}
+            {currentPage === 'terms' && <TermsOfService />}
+          </Suspense>
+        </div>
       </main>
 
       <BottomNav 

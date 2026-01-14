@@ -30,9 +30,9 @@ export const Sidebar = ({ onMenuOpen }: SidebarProps) => {
   ];
 
   return (
-    <aside className="w-64 bg-coffee-beige border-r-2 border-coffee-dark/30 h-screen sticky top-0 flex flex-col">
+    <aside className="w-60 xl:w-64 bg-coffee-beige border-r-2 border-coffee-dark/30 h-screen sticky top-0 flex flex-col">
       {/* Logo Section */}
-      <div className="p-6 border-b border-coffee-dark/20">
+      <div className="p-4 lg:p-6 border-b border-coffee-dark/20">
         <button 
           onClick={() => setCurrentPage('home')}
           className="flex items-center gap-3 mb-4 w-full"
@@ -59,7 +59,7 @@ export const Sidebar = ({ onMenuOpen }: SidebarProps) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 overflow-y-auto p-3 lg:p-4">
         <div className="space-y-1">
           {mainTabs.map(tab => (
             <button
