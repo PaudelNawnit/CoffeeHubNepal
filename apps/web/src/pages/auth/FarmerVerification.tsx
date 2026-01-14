@@ -11,8 +11,8 @@ interface FarmerVerificationProps {
 
 export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProps) => {
   const [formData, setFormData] = useState({
-    farmName: '',
-    farmSize: '',
+    organizationName: '',
+    roleDescription: '',
     location: '',
     yearsOfExperience: '',
     certification: '',
@@ -85,35 +85,46 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
           <div className="w-20 h-20 bg-gradient-to-br from-[#3A7D44] to-[#6F4E37] rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl">
             <CheckCircle className="text-white" size={40} />
           </div>
-          <h1 className="text-3xl font-black text-[#6F4E37] mb-2">Farmer Verification</h1>
-          <p className="text-sm text-gray-600">Get verified to build trust in the community</p>
+          <h1 className="text-3xl font-black text-[#6F4E37] mb-2">Account Verification</h1>
+          <p className="text-sm text-gray-600">
+            Tell us more about how you participate in the coffee ecosystem so we can verify your account.
+          </p>
         </div>
 
         <Card className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               type="text"
-              label="Farm Name"
-              placeholder="Everest Coffee Estate"
-              value={formData.farmName}
-              onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
+              label="Organization / Business Name"
+              placeholder="e.g. Everest Coffee, Local Co-op"
+              value={formData.organizationName}
+              onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
+              required
+            />
+
+            <Input
+              type="text"
+              label="Your Role or Activity"
+              placeholder="e.g. Farmer, Roaster, Trader, Exporter, Expert"
+              value={formData.roleDescription}
+              onChange={(e) => setFormData({ ...formData, roleDescription: e.target.value })}
               required
             />
 
             <div className="grid grid-cols-2 gap-4">
               <Input
                 type="text"
-                label="Farm Size (hectares)"
-                placeholder="2.5"
-                value={formData.farmSize}
-                onChange={(e) => setFormData({ ...formData, farmSize: e.target.value })}
+                label="Location"
+                placeholder="e.g. Kaski, Gandaki Province"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 required
               />
 
               <Input
                 type="text"
                 label="Years of Experience"
-                placeholder="10"
+                placeholder="e.g. 5"
                 value={formData.yearsOfExperience}
                 onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
                 required
@@ -122,17 +133,8 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
 
             <Input
               type="text"
-              label="Farm Location"
-              placeholder="Kaski, Gandaki Province"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              required
-            />
-
-            <Input
-              type="text"
-              label="Certifications (if any)"
-              placeholder="Organic, Fair Trade, etc."
+              label="Relevant Certifications (optional)"
+              placeholder="e.g. Organic, Fair Trade, training programs"
               value={formData.certification}
               onChange={(e) => setFormData({ ...formData, certification: e.target.value })}
             />

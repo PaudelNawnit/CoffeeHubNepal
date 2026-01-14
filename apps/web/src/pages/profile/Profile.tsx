@@ -333,7 +333,7 @@ export const Profile = () => {
       <h3 className="font-black text-xs uppercase text-gray-400 tracking-widest">Management</h3>
       <Card className="divide-y divide-gray-100">
         {[
-          { label: "Farmer Verification", icon: ShieldCheck, color: "text-blue-600", key: "verification" },
+          { label: "Account Verification", icon: ShieldCheck, color: "text-blue-600", key: "verification" },
           { label: "My Listings", icon: Grip, color: "text-[#6F4E37]", key: "listings" },
           { label: "My Jobs", icon: Briefcase, color: "text-green-600", key: "jobs" },
           { label: "Expert Certifications", icon: Award, color: "text-amber-600", key: "certifications" },
