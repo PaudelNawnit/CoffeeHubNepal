@@ -27,7 +27,7 @@ export const csrfSkip = (req: Request, res: Response, next: NextFunction) => {
     return next();
   }
   // Apply CSRF protection - use any to avoid type conflicts with csurf
-  csrfProtection(req as any, res, next);
+  csrfProtection(req as any, res as any, next);
 };
 
 // Get CSRF token endpoint (for forms that need it)
