@@ -32,5 +32,7 @@ export const csrfSkip = (req: Request, res: Response, next: NextFunction) => {
 
 // Get CSRF token endpoint (for forms that need it)
 export const getCsrfToken = (req: Request, res: Response) => {
-  res.json({ csrfToken: req.csrfToken() });
+  // csurf extends Request with csrfToken method
+  const csrfReq = req as Request & { csrfToken: () => string };
+  res.json({ csrfToken: csrfReq.csrfToken() });
 };
