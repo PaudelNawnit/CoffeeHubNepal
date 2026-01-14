@@ -160,7 +160,6 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
                   accept="image/*,.pdf"
                   onChange={handleFileUpload}
                   className="hidden"
-                  id="file-upload"
                 />
                 {isDragging ? (
                   <>
@@ -170,13 +169,17 @@ export const FarmerVerification = ({ onBack, onSuccess }: FarmerVerificationProp
                 ) : (
                   <>
                     <Upload className="mx-auto mb-3 text-gray-400" size={32} />
-                    <p className="text-xs font-black text-gray-500 mb-2">Upload land ownership, ID, or certificates</p>
-                    <p className="text-xs text-gray-400 mb-3">Drag and drop files here or click to browse</p>
-                    <label htmlFor="file-upload">
-                      <Button variant="outline" type="button" className="text-xs cursor-pointer">
-                        Choose Files
-                      </Button>
-                    </label>
+                    <p className="text-xs font-black text-gray-500 mb-2">Upload land ownership, ID, business registration, or certificates</p>
+                    <p className="text-xs text-gray-400 mb-3">Drag and drop files here or use the button below</p>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className="text-xs"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isLoading}
+                    >
+                      Choose Files
+                    </Button>
                   </>
                 )}
               </div>
