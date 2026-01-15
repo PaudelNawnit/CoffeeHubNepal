@@ -28,14 +28,14 @@ export const createApp = () => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for React
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow inline scripts for React
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles for React and Google Fonts
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.google.com", "https://www.gstatic.com"], // Allow inline scripts for React and Google reCAPTCHA
         imgSrc: ["'self'", "data:", "https:"], // Allow data URIs for base64 images
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'", "data:"],
+        connectSrc: ["'self'", "https://www.google.com", "https://generativelanguage.googleapis.com"], // Allow API calls to reCAPTCHA verification and Gemini API
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"], // Allow Google Fonts
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
+        frameSrc: ["https://www.google.com", "https://www.gstatic.com"], // Allow reCAPTCHA iframes
       },
     },
     crossOriginEmbedderPolicy: false, // Disable for compatibility
