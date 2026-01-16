@@ -18,7 +18,7 @@ import PradipKhanalImage from '@/assets/images/team/PradipKhanal.png';
 import AdityaManShresthaImage from '@/assets/images/team/AdityaManShrestha.png';
 
 const TEAM_MEMBERS = [
-  { name: "Suraj Nepal", role: "Lund Himself", image: surajNepalImage },
+  { name: "Suraj Nepal", role: "CEO", image: surajNepalImage },
   { name: "Sarthak Bhattarai", role: "Social Media Manager", image: SarthakBhattaraiImage },
   { name: "Siddhant Giri", role: "Frontend Developer", image: SiddhantGiriImage },
   { name: "Krrish Nyopane", role: "UI/UX Designer", image: KrrishNyopaneImage },
