@@ -123,7 +123,12 @@ export const Events = () => {
               <Button 
                 variant="primary" 
                 className="w-full"
-                onClick={() => navigate('event-detail', event.id || event._id)}
+                onClick={() => {
+                  // Store string ID in sessionStorage since navigate expects a number
+                  sessionStorage.setItem('eventDetailId', event.id || event._id);
+                  // Use a dummy number ID - EventDetail will read from sessionStorage
+                  navigate('event-detail', 0);
+                }}
               >
                 View Details <ArrowRight size={16} />
               </Button>

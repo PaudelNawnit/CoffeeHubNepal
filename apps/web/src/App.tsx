@@ -254,7 +254,10 @@ const AppContent = () => {
         if (jobId) return <JobDetail jobId={jobId} onBack={handleBack} />;
       }
       if (subPage === 'create-job') return <CreateJob onBack={handleBack} />;
-      if (subPage === 'event-detail' && selectedId) return <EventDetail eventId={selectedId} onBack={handleBack} />;
+      if (subPage === 'event-detail') {
+        const eventId = sessionStorage.getItem('eventDetailId') || (selectedId ? selectedId.toString() : '');
+        if (eventId) return <EventDetail eventId={eventId} onBack={handleBack} />;
+      }
       if (subPage === 'my-listings') return <MyListings />;
       if (subPage === 'my-jobs') return <MyJobs />;
       if (subPage === 'certifications') return <Certifications />;
