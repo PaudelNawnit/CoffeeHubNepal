@@ -16,6 +16,7 @@ import jobRoutes from './routes/jobs.js';
 import productRoutes from './routes/products.js';
 import priceRoutes from './routes/prices.js';
 import contactRoutes from './routes/contacts.js';
+import eventRoutes from './routes/events.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -128,7 +129,8 @@ export const createApp = () => {
     if (req.method === 'GET' && !req.path.startsWith('/auth') && !req.path.startsWith('/admin')) {
       // Cache public data for 5 minutes
       if (req.path.startsWith('/blog') || req.path.startsWith('/jobs') || 
-          req.path.startsWith('/products') || req.path.startsWith('/prices')) {
+          req.path.startsWith('/products') || req.path.startsWith('/prices') ||
+          req.path.startsWith('/events')) {
         res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
       }
       // Cache health check for 1 minute
@@ -151,6 +153,7 @@ export const createApp = () => {
   app.use('/products', productRoutes);
   app.use('/prices', priceRoutes);
   app.use('/contacts', contactRoutes);
+  app.use('/events', eventRoutes);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
   

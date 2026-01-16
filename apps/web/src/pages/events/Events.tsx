@@ -1,45 +1,44 @@
+import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Clock, Users, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { useApp } from '@/context/AppContext';
-
-const MOCK_EVENTS = [
-  {
-    id: 1,
-    title: "Coffee Harvest Festival 2024",
-    date: "March 15, 2024",
-    time: "9:00 AM",
-    location: "Pokhara, Kaski",
-    attendees: 150,
-    type: "Festival",
-    image: "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400"
-  },
-  {
-    id: 2,
-    title: "Organic Farming Workshop",
-    date: "March 22, 2024",
-    time: "10:00 AM",
-    location: "Kathmandu",
-    attendees: 45,
-    type: "Workshop",
-    image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400"
-  },
-  {
-    id: 3,
-    title: "Coffee Cupping Session",
-    date: "March 28, 2024",
-    time: "2:00 PM",
-    location: "Lalitpur",
-    attendees: 30,
-    type: "Training",
-    image: "https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?auto=format&fit=crop&w=400"
-  }
-];
+import { eventService, Event } from '@/services/event.service';
 
 export const Events = () => {
   const { navigate } = useApp();
-  
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await eventService.getEvents({ upcoming: true });
+      setEvents(response.events);
+    } catch (err) {
+      console.error('Failed to load events:', err);
+      setError('Failed to load events. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   return (
     <div className="p-6 space-y-6 animate-in fade-in pb-32">
       <div className="flex justify-between items-end">
@@ -52,11 +51,35 @@ export const Events = () => {
         </Button>
       </div>
 
+      {loading && (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 border-4 border-[#6F4E37] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-gray-500 text-sm">Loading events...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && events.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg mb-2">No upcoming events</p>
+          <p className="text-gray-400 text-sm">Check back later for new events!</p>
+        </div>
+      )}
+
       <div className="space-y-6">
-        {MOCK_EVENTS.map(event => (
-          <Card key={event.id} className="overflow-hidden">
+        {events.map(event => (
+          <Card key={event.id || event._id} className="overflow-hidden">
             <div className="relative h-48">
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+              <img 
+                src={event.image || 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400'} 
+                alt={event.title} 
+                className="w-full h-full object-cover" 
+              />
               <div className="absolute top-4 right-4">
                 <Badge variant="primary">{event.type}</Badge>
               </div>
@@ -69,7 +92,7 @@ export const Events = () => {
                   <Calendar size={16} className="text-[#6F4E37]" />
                   <div>
                     <p className="text-xs font-black text-gray-400 uppercase">Date</p>
-                    <p className="font-black">{event.date}</p>
+                    <p className="font-black">{formatDate(event.date)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -90,7 +113,9 @@ export const Events = () => {
                   <Users size={16} className="text-[#6F4E37]" />
                   <div>
                     <p className="text-xs font-black text-gray-400 uppercase">Attendees</p>
-                    <p className="font-black">{event.attendees} registered</p>
+                    <p className="font-black">
+                      {event.attendees} {event.maxAttendees ? `/ ${event.maxAttendees}` : ''} registered
+                    </p>
                   </div>
                 </div>
               </div>
@@ -98,7 +123,7 @@ export const Events = () => {
               <Button 
                 variant="primary" 
                 className="w-full"
-                onClick={() => navigate('event-detail', event.id)}
+                onClick={() => navigate('event-detail', event.id || event._id)}
               >
                 View Details <ArrowRight size={16} />
               </Button>
