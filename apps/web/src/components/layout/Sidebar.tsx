@@ -25,7 +25,6 @@ export const Sidebar = ({ onMenuOpen }: SidebarProps) => {
     { id: 'jobs', icon: Briefcase, label: t(language, 'nav.jobs') }, // Using lucide for now
     { id: 'prices', icon: DollarSign, label: t(language, 'nav.prices') }, // Using lucide for now
     { id: 'events', icon: Calendar, label: t(language, 'nav.events') }, // Using lucide for now
-    { id: 'groups', iconName: 'Sidebar_User_20', label: t(language, 'nav.groups') }, // Using User icon as placeholder
     { id: 'profile', iconName: 'Sidebar_User_20', label: t(language, 'nav.profile') }
   ];
 

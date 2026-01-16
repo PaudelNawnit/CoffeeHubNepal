@@ -12,7 +12,6 @@ export const en = {
     blog: 'Blog',
     prices: 'Prices',
     events: 'Events',
-    groups: 'Groups',
     about: 'About Us',
     contact: 'Contact Us',
     faq: 'FAQ',

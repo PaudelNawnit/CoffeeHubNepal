@@ -30,8 +30,6 @@ const CreateJob = lazy(() => import('./pages/jobs/CreateJob').then(m => ({ defau
 const PriceBoard = lazy(() => import('./pages/prices/PriceBoard').then(m => ({ default: m.PriceBoard })));
 const Events = lazy(() => import('./pages/events/Events').then(m => ({ default: m.Events })));
 const EventDetail = lazy(() => import('./pages/events/EventDetail').then(m => ({ default: m.EventDetail })));
-const Groups = lazy(() => import('./pages/groups/Groups').then(m => ({ default: m.Groups })));
-const GroupDetail = lazy(() => import('./pages/groups/GroupDetail').then(m => ({ default: m.GroupDetail })));
 const Login = lazy(() => import('./pages/auth/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/auth/Register').then(m => ({ default: m.Register })));
 const FarmerVerification = lazy(() => import('./pages/auth/FarmerVerification').then(m => ({ default: m.FarmerVerification })));
@@ -257,7 +255,6 @@ const AppContent = () => {
       }
       if (subPage === 'create-job') return <CreateJob onBack={handleBack} />;
       if (subPage === 'event-detail' && selectedId) return <EventDetail eventId={selectedId} onBack={handleBack} />;
-      if (subPage === 'group-detail' && selectedId) return <GroupDetail groupId={selectedId} onBack={handleBack} />;
       if (subPage === 'my-listings') return <MyListings />;
       if (subPage === 'my-jobs') return <MyJobs />;
       if (subPage === 'certifications') return <Certifications />;
@@ -318,7 +315,6 @@ const AppContent = () => {
                 {currentPage === 'blog' && <BlogList />}
                 {currentPage === 'prices' && <PriceBoard />}
                 {currentPage === 'events' && <Events />}
-                {currentPage === 'groups' && <Groups />}
                 {currentPage === 'about' && <AboutUs />}
                 {currentPage === 'contact' && <ContactUs />}
                 {currentPage === 'faq' && <FAQ />}
@@ -371,7 +367,6 @@ const AppContent = () => {
             {currentPage === 'blog' && <BlogList />}
             {currentPage === 'prices' && <PriceBoard />}
             {currentPage === 'events' && <Events />}
-            {currentPage === 'groups' && <Groups />}
             {currentPage === 'about' && <AboutUs />}
             {currentPage === 'contact' && <ContactUs />}
             {currentPage === 'faq' && <FAQ />}

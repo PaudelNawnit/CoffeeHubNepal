@@ -10,7 +10,6 @@ export const ne = {
     blog: 'ब्लग',
     prices: 'मूल्य',
     events: 'कार्यक्रम',
-    groups: 'समूह',
     about: 'हाम्रो बारेमा',
     contact: 'सम्पर्क',
     faq: 'प्रश्नोत्तर',
